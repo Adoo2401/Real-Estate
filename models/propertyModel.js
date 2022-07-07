@@ -73,6 +73,11 @@ const propertySchema = new mongoose.Schema({
     
   },
 
+  status:{
+    type:String,
+    default:"pending"
+  },
+
   verified: {
     type: Boolean,
     default: false,
@@ -101,6 +106,7 @@ const propertySchema = new mongoose.Schema({
 });
 //}
 
-propertySchema.index({location:'2dsphere'});
+ propertySchema.index({location:'2dsphere'});
+
 
 module.exports = mongoose.model("Property", propertySchema);

@@ -36,9 +36,7 @@ try {
 
     //Creating a json Web Token
 
-    const token=jsonwebtoken.sign({id:user._id},process.env.JWT_SECRET,{
-      expiresIn:process.env.JWT_EXPIRE
-    })
+    const token=jsonwebtoken.sign({id:user._id},process.env.JWT_SECRET)
 
   
     responseSend(resp,201,true,{token,user});
@@ -81,9 +79,7 @@ exports.loginUser=async(req,resp)=>{
 
     
 
-    const token=jsonwebtoken.sign({id:user._id},process.env.JWT_SECRET,{
-      expiresIn:process.env.JWT_EXPIRE
-    })
+    const token=jsonwebtoken.sign({id:user._id},process.env.JWT_SECRET);
 
 
     if(hashPass){

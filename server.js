@@ -19,7 +19,7 @@ connectDatabase();
 //}
 
 //Createing the server here{
-app.listen(process.env.PORT,"192.168.1.13", () => {
+app.listen(process.env.PORT,"192.168.1.2", () => {
   console.log(`server is working on ${process.env.PORT}`);
 });
 //}

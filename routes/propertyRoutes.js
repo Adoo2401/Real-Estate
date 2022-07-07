@@ -10,6 +10,7 @@ const {
   adminSearch,
   adminEdit,
   adminDelete,
+  getPropertyCoordinate,
 } = require("../controllers/propertyController");
 const verifyRole = require("../middlewares/verifyRole");
 const verifyToken = require("../middlewares/verifyToken");
@@ -23,6 +24,11 @@ router.route("/filter_property").get(verifyToken,filterProperty);
 router.route("/delete_property/:property_id").delete(verifyToken,deleteProperty);
 router.route("/update_property/:property_id").put(verifyToken,updateProperty);
 router.route("/logged_in_user_property").get(verifyToken,loggedInUserProperties)
+router.route('/property_location').post(verifyToken,getPropertyCoordinate)
+
+
+
+//Admin routes
 router.route('/admin-property').get(verifyToken,verifyRole,adminGetProperty)
 router.route("/admin-search").get(verifyToken,verifyRole,adminSearch)
 router.route("/admin-edit").put(verifyToken,verifyRole,adminEdit)

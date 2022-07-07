@@ -16,8 +16,7 @@ const validator=require("validator");
 exports.adminDelete=async(req,resp)=>{
 
   try {
-    
-   
+
     req.body.forEach(async(elm)=>{
       await Property.findByIdAndDelete(elm._id);
     })
@@ -155,11 +154,46 @@ exports.adminSearch=async(req,resp)=>{
 
 
 
+//Controller to find the nearest property of given longitude and latitude in a range of 2kms
+
+
+exports.getPropertyCoordinate=async(req,resp)=>{
+  try {
+    
+    const longitude=req.body.longitude;
+    const latitude=req.body.latitude;
+
+    const property=await Property.find({
+      location:{
+        $near:{
+          $geometry:{
+            type:"Point",
+            coordinates:[parseFloat(longitude),parseFloat(latitude)]
+          },
+
+          $maxDistance:2000
+        }
+      }
+    })
+
+    responseSend(resp,200,true,property);
+   
+
+  } catch (error) {
+    
+    console.log(error)
+    responseSend(resp,500,false,error);
+
+  }
+}
+
+
+
 //Controller to get the property details{
 exports.getProperty = async (req, resp) => {
   try {
    
-    const property = await Property.find()
+    const property = await Property.find({status:'active'})
       .sort({ superHot: -1, verified: -1 })
       .clone();
     responseSend(resp, 200, true, property);
@@ -177,10 +211,19 @@ exports.addProperty = async (req, resp) => {
      let location=req.body.location;
      delete req.body["location"];
 
-     const newProperty = await Property.create({...req.body,user:req.user._id,location:{type:"Path",address:location.address,coordinates:[parseFloat(location.coordinates[0]),parseFloat(location.coordinates[1])]}});
+     req.body.purpose=req.body.purpose.toLowerCase();
+     req.body.propertyType=req.body.propertyType.toLowerCase();
+     req.body.propertySubType=req.body.propertySubType.toLowerCase();
+     req.body.city=req.body.city.toLowerCase();
+     req.body.propertyTitle=req.body.propertyTitle.toLowerCase();
+     req.body.landAreaUnit=req.body.landAreaUnit.toLowerCase();
+
+
+     const newProperty = await Property.create({...req.body,user:req.user._id,location:{type:"Point",address:location.address,coordinates:[parseFloat(location.coordinates[0]),parseFloat(location.coordinates[1])]}});
 
     responseSend(resp, 201, true, newProperty);
   } catch (error) {
+    console.log(error)
     responseSend(resp, 500, false, error);
   }
 };
