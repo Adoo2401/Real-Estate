@@ -529,4 +529,24 @@ exports.getCall=async(req,resp)=>{
 
 }
 
+
+//to get the properties of logged in user and will be filtered by active rejected or pending
+
+exports.loggedInUserStatusProperties=async(req,resp)=>{
+
+  try {
+    
+  let {status}=req.params;
+
+  let property=await Property.find({status:status,user:req.user._id});
+
+  responseSend(resp,200,true,property);
+
+  } catch (error) {
+    
+    responseSend(resp,500,false,error.message);
+
+  }
+}
+
 //}
