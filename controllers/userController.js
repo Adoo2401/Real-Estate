@@ -3,6 +3,7 @@ const responseSend = require("../utils/response");
 const bcrypt=require("bcrypt");
 const validator=require("validator");
 const jsonwebtoken=require("jsonwebtoken");
+const Property=require("../models/propertyModel");
 
 // To register the user{
 
@@ -102,19 +103,91 @@ exports.loginUser=async(req,resp)=>{
 //}
 
 
-//LogOut User {
 
-  exports.logoutUser = async (req, resp) => {
-    resp
-      .status(200)
-      .cookie("token", null, {
-        expires: new Date(Date.now()),
-        httpOnly: true,
-      })
-      .json({
-        success: true,
-        message: "Log out successfully",
-      });
-  };
+//controller to add the property to the favourite list
 
-//}
+
+exports.addFavourite=async(req,resp)=>{
+  try {
+
+    let {property_id}=req.params;
+
+    let user=await User.findById(req.user._id).clone();
+    
+
+    let check=user.favourites.filter((elm)=>{
+      return elm===property_id;
+    })
+
+    if(check.length>0){
+      return responseSend(resp,500,false,'Property already added to favourite list');
+    }
+
+    user.favourites.push(property_id.toString());
+
+    await user.save({validateBeforeSave:false});
+
+    responseSend(resp,200,true,'Property added to favourite list');
+
+           
+
+  } catch (error) {
+    responseSend(resp,500,false,error.message);
+  }
+}
+
+
+//Controller to get the favourites properties of the user
+
+exports.getFavourites=async(req,resp)=>{
+
+  try {
+    
+  
+   let user=await User.findById(req.user._id);
+
+   var fav=[];
+
+   for(var i=0;i<user.favourites.length;i++){
+    
+     let prop=await Property.findById(user.favourites[i]).clone()
+     fav.push(prop);
+     
+   }
+
+   responseSend(resp,200,true,fav)
+
+  } catch (error) {
+
+    responseSend(resp,500,false,error.message);
+    
+  }
+}
+
+
+//Controller to delete the favourites properties of the user
+
+
+exports.delFavourite=async(req,resp)=>{
+  try {
+    
+    let {property_id}=req.params;
+
+    let user=await User.findById(req.user._id).clone();
+
+    user.favourites= user.favourites.filter((elm)=>{
+      return elm!=property_id
+    })
+
+    await user.save({validateBeforeSave:false});
+
+    responseSend(resp,200,true,'Successfully Deleted');
+
+
+  } catch (error) {
+    
+    responseSend(resp,500,false,error.message);
+
+  }
+}
+

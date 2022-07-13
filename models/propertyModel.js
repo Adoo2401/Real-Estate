@@ -98,10 +98,12 @@ const propertySchema = new mongoose.Schema({
     type:String,
     default:"https://i.pinimg.com/originals/e0/6e/6a/e06e6a5e3936e5700401656a8285c8ee.jpg"
 
-  }
+  },
 
+  views:[],
+  clicks:[],
+  calls:[],
 
-  
   //images and the user added by will be added later
 });
 //}

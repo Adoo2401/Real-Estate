@@ -356,5 +356,177 @@ exports.loggedInUserProperties=async(req,resp)=>{
   }
 }
 
+//get single property with id
+
+exports.singleProperty=async(req,resp)=>{
+
+  try {
+    
+    let property=await Property.findById(req.params.property_id);
+
+    if(property){
+      return responseSend(resp,200,true,property);
+    }
+
+    responseSend(resp,500,false,'No property Found');
+
+  } catch (error) {
+    responseSend(resp,500,false,error.message);
+  }
+}
+
+
+//controller to increase the views of the property
+
+
+exports.increaseView=async(req,resp)=>{
+
+  try {
+    
+    let {property_id}=req.params;
+    
+    let property=await Property.findById(property_id).clone();
+
+    let check=property.views.filter((elm)=>{
+      return elm===(req.user._id).toString();
+    })
+
+    if(check.length>0){
+      return responseSend(resp,500,false,'Already Viewed');
+    }
+
+    property.views.push((req.user._id).toString());
+
+    await property.save({validateBeforeSave:false});
+
+    responseSend(resp,200,true,'viewed');
+
+  } catch (error) {
+
+
+    responseSend(resp,500,false,error.message);
+  }
+}
+
+//To get the views of single Property
+
+exports.getView=async(req,resp)=>{
+  try {
+
+    let {property_id}=req.params;
+
+    let property=await Property.findById(property_id).clone();
+
+    responseSend(resp,200,true,property.views.length);
+
+    
+  } catch (error) {
+
+    responseSend(resp,500,false,error.message);
+    
+  }
+}
+
+
+//To increase the clicks
+
+exports.increaseClick=async(req,resp)=>{
+
+  try {
+    
+    let {property_id}=req.params;
+    
+    let property=await Property.findById(property_id).clone();
+
+    let check=property.clicks.filter((elm)=>{
+      return elm===(req.user._id).toString();
+    })
+
+    if(check.length>0){
+      return responseSend(resp,500,false,'Already Clicked');
+    }
+
+    property.clicks.push((req.user._id).toString());
+
+    await property.save({validateBeforeSave:false});
+
+    responseSend(resp,200,true,'Clicked');
+
+  } catch (error) {
+    responseSend(resp,500,false,error.message);
+  }
+}
+
+//to get the all clicks of the user
+
+exports.getClick=async(req,resp)=>{
+
+  try {
+
+    let {property_id}=req.params;
+
+    let property=await Property.findById(property_id).clone();
+
+    responseSend(resp,200,true,property.clicks.length);
+
+    
+  } catch (error) {
+
+    responseSend(resp,500,false,error.message);
+    
+  }
+
+}
+
+//To increase the call button taps
+
+exports.increaseCall=async(req,resp)=>{
+
+  try {
+    
+    let {property_id}=req.params;
+    
+    let property=await Property.findById(property_id).clone();
+
+    let check=property.calls.filter((elm)=>{
+      return elm===(req.user._id).toString();
+    })
+
+    if(check.length>0){
+      return responseSend(resp,500,false,'Already Called');
+    }
+
+    property.calls.push((req.user._id).toString());
+
+    await property.save({validateBeforeSave:false});
+
+    responseSend(resp,200,true,'Called');
+
+  } catch (error) {
+    responseSend(resp,500,false,error.message);
+  }
+}
+
+//To get how many call buttons havebeen clicked of single property
+
+
+exports.getCall=async(req,resp)=>{
+
+  try {
+
+    let {property_id}=req.params;
+
+    let property=await Property.findById(property_id).clone();
+
+    responseSend(resp,200,true,property.calls.length);
+
+    
+  } catch (error) {
+
+    responseSend(resp,500,false,error.message);
+    
+  }
+
+}
 
 //}
