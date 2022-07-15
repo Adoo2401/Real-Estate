@@ -191,3 +191,61 @@ exports.delFavourite=async(req,resp)=>{
   }
 }
 
+//For admin to get all the users
+
+exports.adminGetUsers=async(req,resp)=>{
+
+  try {
+    
+    let usersCount=await User.countDocuments();
+    let skip=req.query.skip?req.query.skip:0;
+
+    let users=await User.find().limit(8).skip(skip);
+    responseSend(resp,200,true,{users,usersCount});
+
+  } catch (error) {
+    responseSend(resp,500,false,error.message);
+  }
+}
+
+
+//For admin to search by user name
+
+exports.adminSearch=async(req,resp)=>{
+
+  try {
+
+    let {keyword,skip}=req.query;
+
+    let users=await User.find({name:{$regex:keyword,$options:'i'}}).limit(8).skip(skip);
+    let anotherUser=await User.find({name:{$regex:keyword,$options:'i'}})
+
+    let usersCount=anotherUser.length;
+    
+    responseSend(resp,200,true,{users,usersCount});
+
+    
+  } catch (error) {
+     responseSend(resp,500,false,error.message);  
+  }
+}
+
+
+//For admin to edit the role of the user
+
+exports.adminEdit=async(req,resp)=>{
+
+  try {
+
+    
+    let {userId}=req.params
+    let {role}=req.body;
+
+    await User.findByIdAndUpdate(userId,{role});
+
+    responseSend(resp,200,true,'Edit Successfully');
+
+  } catch (error) {
+    responseSend(resp,500,false,error.message);
+  }
+}

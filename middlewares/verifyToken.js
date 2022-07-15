@@ -8,10 +8,11 @@ const verifyToken=async(req,resp,next)=>{
 
     
     const token=req.headers['authorization'];
-    
 
     if(!token){
+
         return responseSend(resp,500,false,"Please Log in To access this route");
+        
     }
 
     jwt.verify(token,process.env.JWT_SECRET,async(err,valid)=>{
@@ -26,7 +27,7 @@ const verifyToken=async(req,resp,next)=>{
     
 
  } catch (error) {
-    responseSend(resp,500,false,"Something Went Wrong")
+    responseSend(resp,500,false,error.message)
  }
     
 }

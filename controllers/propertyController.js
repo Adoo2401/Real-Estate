@@ -30,6 +30,11 @@ exports.adminDelete=async(req,resp)=>{
   }
 }
 
+
+
+
+
+
 //For admin to edit property
 
 

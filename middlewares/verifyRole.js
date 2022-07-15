@@ -3,8 +3,10 @@ const responseSend=require("../utils/response");
 
 const verifyRole=async(req,resp,next)=>{
     try {
-        
-        if(req.user.role==="admin"){
+
+        let role=req.user.role;
+
+        if(role==="admin"){
             next();
         }else{
             responseSend(resp,401,false,"Only Admin can access to this routes")
@@ -12,7 +14,7 @@ const verifyRole=async(req,resp,next)=>{
 
     } catch (error) {
         
-        responseSend(resp,500,false,"Something Went Wrong")
+        responseSend(resp,500,false,error.message)
 
     }
 }
