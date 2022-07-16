@@ -249,3 +249,24 @@ exports.adminEdit=async(req,resp)=>{
     responseSend(resp,500,false,error.message);
   }
 }
+
+
+//For admin to delete the user
+
+
+exports.adminDelete=async(req,resp)=>{
+
+  try {
+
+     req.body.forEach(async(elm)=>{
+      await User.findByIdAndDelete(elm._id);
+    })
+
+    responseSend(resp,201,true,"Deleted Successfully");
+
+  } catch (error) {
+
+    responseSend(resp,500,false,error.message);
+
+  }
+}

@@ -19,6 +19,7 @@ const {
   getCall,
   singleProperty,
   loggedInUserStatusProperties,
+  recentlyAdded,
 } = require("../controllers/propertyController");
 const verifyRole = require("../middlewares/verifyRole");
 const verifyToken = require("../middlewares/verifyToken");
@@ -38,6 +39,7 @@ router.route('/view/:property_id').post(verifyToken,increaseView).get(verifyToke
 router.route("/click/:property_id").post(verifyToken,increaseClick).get(verifyToken,getClick)
 router.route("/call/:property_id").post(verifyToken,increaseCall).get(verifyToken,getCall);
 router.route("/logged_status/:status").get(verifyToken,loggedInUserStatusProperties)
+router.route("/recently-added").get(verifyToken,recentlyAdded);
 
 
 //Admin routes

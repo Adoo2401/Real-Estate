@@ -12,7 +12,6 @@ const validator=require("validator");
 
 //For admin to delete Property
 
-
 exports.adminDelete=async(req,resp)=>{
 
   try {
@@ -29,11 +28,6 @@ exports.adminDelete=async(req,resp)=>{
 
   }
 }
-
-
-
-
-
 
 //For admin to edit property
 
@@ -115,7 +109,7 @@ exports.adminSearch=async(req,resp)=>{
         {propertySubType: req.query.keyword},
         {city:  req.query.keyword},
         {location: req.query.keyword},
-        {propertyTitle: req.query.keyword},
+        {propertyTitle:{$regex:req.query.keyword,$options:'i'}},
         {landAreaUnit:  req.query.keyword}
           
       ]
@@ -185,8 +179,6 @@ exports.getPropertyCoordinate=async(req,resp)=>{
    
 
   } catch (error) {
-    
-    console.log(error)
     responseSend(resp,500,false,error);
 
   }
@@ -228,7 +220,7 @@ exports.addProperty = async (req, resp) => {
 
     responseSend(resp, 201, true, newProperty);
   } catch (error) {
-    console.log(error)
+    
     responseSend(resp, 500, false, error);
   }
 };
@@ -306,10 +298,7 @@ exports.deleteProperty=async(req,resp)=>{
   }
 
 }
-
-
 //}
-
 
 // Update the property{
 
@@ -549,6 +538,24 @@ exports.loggedInUserStatusProperties=async(req,resp)=>{
 
   } catch (error) {
     
+    responseSend(resp,500,false,error.message);
+
+  }
+}
+
+
+//To get the recently added properties 
+
+exports.recentlyAdded=async(req,resp)=>{
+
+  try {
+
+    let properties=await Property.find().sort({added:-1}).limit(3);
+     
+    responseSend(resp,200,true,properties);
+    
+  } catch (error) {
+
     responseSend(resp,500,false,error.message);
 
   }
