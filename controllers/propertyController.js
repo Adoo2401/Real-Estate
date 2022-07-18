@@ -3,6 +3,7 @@ const mongoose = require("mongoose");
 const Property = require("../models/propertyModel");
 const responseSend = require("../utils/response");
 const validator=require("validator");
+const User=require("../models/userModel");
 //}
 
 //creating main functions that will be called when the specific route will hit{
@@ -101,7 +102,10 @@ exports.adminSearch=async(req,resp)=>{
 
     }else{
 
+      let check=req.query.keyword='superhot'?false:undefined
+
     const property=await Property.find({
+
       $or: [
          
         {propertyType:req.query.keyword },
@@ -110,7 +114,10 @@ exports.adminSearch=async(req,resp)=>{
         {city:  req.query.keyword},
         {location: req.query.keyword},
         {propertyTitle:{$regex:req.query.keyword,$options:'i'}},
-        {landAreaUnit:  req.query.keyword}
+        {landAreaUnit:  req.query.keyword},
+        {status:req.query.keyword},
+        {superHot:check}
+
           
       ]
     } 
@@ -128,7 +135,10 @@ exports.adminSearch=async(req,resp)=>{
         {city:  req.query.keyword},
         {location: req.query.keyword},
         {propertyTitle: req.query.keyword},
-        {landAreaUnit:  req.query.keyword}
+        {landAreaUnit:  req.query.keyword},
+        {status:req.query.keyword},
+        {superHot:check}
+
           
       ]
     }).clone()
@@ -242,8 +252,19 @@ exports.filterProperty = async (req, resp) => {
 
         req.query.propertyType ? { propertyType: req.query.propertyType } : {},
         req.query.purpose ? { purpose: req.query.purpose } : {},
-        req.query.keyword
-          ? { location: { $regex: req.query.keyword, $options: "i" } }
+        req.query.latitude && req.query.longitude
+          ? {
+            location:{
+              $near:{
+                $geometry:{
+                  type:"Point",
+                  coordinates:[parseFloat(req.query.longitude),parseFloat(req.query.latitude)]
+                },
+      
+                $maxDistance:5000
+              }
+            }
+          }
           : {},
         req.query.landAreaNumbergt
           ? { landAreaNumber: { $gte: req.query.landAreaNumbergt } }
@@ -262,6 +283,7 @@ exports.filterProperty = async (req, resp) => {
             ? { bathroom: { $gte: 6 } }
             : { bathroom: req.query.bathroom }
           : {},
+          {status:'active'}
       ],
     })
       .sort({ superHot: -1, verified: -1 })
@@ -356,10 +378,21 @@ exports.singleProperty=async(req,resp)=>{
 
   try {
     
-    let property=await Property.findById(req.params.property_id);
+    let property=await Property.findById(req.params.property_id).clone()
+
+    let user=await User.findById(property.user).clone();
+    
+    let userDetails={
+      name:user.name,
+      phone:user.phone,
+      email:user.email,
+      city:user.city
+    }
+
+    let final={property,userDetails};
 
     if(property){
-      return responseSend(resp,200,true,property);
+      return responseSend(resp,200,true,final);
     }
 
     responseSend(resp,500,false,'No property Found');
