@@ -35,11 +35,7 @@ exports.adminDelete=async(req,resp)=>{
 
 exports.adminEdit=async(req,resp)=>{
   try {
-    
-    const _id=req.body._id;
-    delete req.body["_id"];  
-    
-    await Property.findByIdAndUpdate(_id,req.body);
+    await Property.findByIdAndUpdate(req.params.id,req.body);
 
     responseSend(resp,201,true,"Updated");
     
@@ -52,107 +48,33 @@ exports.adminEdit=async(req,resp)=>{
 }
 
 
+//For admin to get singe property with id
+
+exports.adminGetSingle=async(req,resp)=>{
+
+  try {
+
+    let property=await Property.findById(req.params.id);
+    responseSend(resp,201,true,property);
+
+  } catch (error) {
+
+    responseSend(resp,500,false,error.message);
+  }
+}
+
 
 //To get minimum 8 properties per page
 exports.adminGetProperty=async(req,resp)=>{
   try {
 
-    const resultPerPage = 8;
-    const propertyCount = await Property.countDocuments();
-    
-    const currentPage = Number(req.query.page) || 1;
-    let skip = resultPerPage * (currentPage - 1);
+      const property = await Property.find().clone();
 
-    if(req.query.skip){
-     skip=Number(req.query.skip)  
-    }
-    
-    const paginationProperty = await Property.find()
-      .limit(resultPerPage)
-      .skip(skip).clone();
-
-      responseSend(resp,200,true,{paginationProperty,propertyCount})
+      responseSend(resp,200,true,property);
 
   } catch (error) {
     
     
-    responseSend(resp,500,false,"Something Went Wrong");
-
-  }
-}
-
-//For searching in data grid search
-
-exports.adminSearch=async(req,resp)=>{
-  try {
-
-
-    const resultPerPage = 8;
-    const currentPage = Number(req.query.page) || 1;
-    let skip = resultPerPage * (currentPage - 1);
-
-    if(req.query.skip){
-      skip=Number(req.query.skip)
-    }
-
-    if(validator.isMongoId(req.query.keyword)){
-      
-      const property=await Property.findById(req.query.keyword);
-      return responseSend(resp,200,true,{property,id:true})
-
-    }else{
-
-      let check=req.query.keyword='superhot'?false:undefined
-
-    const property=await Property.find({
-
-      $or: [
-         
-        {propertyType:req.query.keyword },
-        {purpose: req.query.keyword},
-        {propertySubType: req.query.keyword},
-        {city:  req.query.keyword},
-        {location: req.query.keyword},
-        {propertyTitle:{$regex:req.query.keyword,$options:'i'}},
-        {landAreaUnit:  req.query.keyword},
-        {status:req.query.keyword},
-        {superHot:check}
-
-          
-      ]
-    } 
-   
-    ).limit(resultPerPage).skip(skip).clone()
-
-    //Searching property with same keyword but without limit and skip
-
-    const newProperty=await Property.find({
-      $or: [
-         
-        {propertyType:req.query.keyword },
-        {purpose: req.query.keyword},
-        {propertySubType: req.query.keyword},
-        {city:  req.query.keyword},
-        {location: req.query.keyword},
-        {propertyTitle: req.query.keyword},
-        {landAreaUnit:  req.query.keyword},
-        {status:req.query.keyword},
-        {superHot:check}
-
-          
-      ]
-    }).clone()
-
-
-    responseSend(resp,200,true,{property,count:newProperty.length})
-  }
-
-    
-  
-    
-  } catch (error) {
-
-    console.log(error)
     responseSend(resp,500,false,"Something Went Wrong");
 
   }
@@ -160,7 +82,6 @@ exports.adminSearch=async(req,resp)=>{
 
 
 //}
-
 
 
 //Controller to find the nearest property of given longitude and latitude in a range of 2kms
@@ -262,7 +183,7 @@ exports.filterProperty = async (req, resp) => {
                   coordinates:[parseFloat(req.query.longitude),parseFloat(req.query.latitude)]
                 },
       
-                $maxDistance:5000
+                $maxDistance:req.query.radius
               }
             }
           }

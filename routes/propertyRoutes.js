@@ -7,7 +7,6 @@ const {
   updateProperty,
   loggedInUserProperties,
   adminGetProperty,
-  adminSearch,
   adminEdit,
   adminDelete,
   getPropertyCoordinate,
@@ -20,6 +19,7 @@ const {
   singleProperty,
   loggedInUserStatusProperties,
   recentlyAdded,
+  adminGetSingle,
 } = require("../controllers/propertyController");
 const verifyRole = require("../middlewares/verifyRole");
 const verifyToken = require("../middlewares/verifyToken");
@@ -44,9 +44,9 @@ router.route("/recently-added").get(verifyToken,recentlyAdded);
 
 //Admin routes
 router.route('/admin-property').get(verifyToken,verifyRole,adminGetProperty)
-router.route("/admin-search").get(verifyToken,verifyRole,adminSearch)
-router.route("/admin-edit").put(verifyToken,verifyRole,adminEdit)
+router.route("/admin-edit/:id").put(verifyToken,verifyRole,adminEdit)
 router.route("/admin-delete").delete(verifyToken,verifyRole,adminDelete)
+router.route("/admin-get-single/:id").get(verifyToken,verifyRole,adminGetSingle);
 
 
 //}

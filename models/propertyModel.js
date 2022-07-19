@@ -96,8 +96,7 @@ const propertySchema = new mongoose.Schema({
   image:{
 
     type:String,
-    default:"https://i.pinimg.com/originals/e0/6e/6a/e06e6a5e3936e5700401656a8285c8ee.jpg"
-
+    default:"https://images.unsplash.com/photo-1600585154340-be6161a56a0c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8Mnx8cHJvcGVydHl8ZW58MHx8MHx8&w=1000&q=80"
   },
 
   views:[],
