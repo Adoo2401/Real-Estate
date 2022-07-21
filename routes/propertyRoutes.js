@@ -45,7 +45,7 @@ router.route("/recently-added").get(verifyToken,recentlyAdded);
 //Admin routes
 router.route('/admin-property').get(verifyToken,verifyRole,adminGetProperty)
 router.route("/admin-edit/:id").put(verifyToken,verifyRole,adminEdit)
-router.route("/admin-delete").delete(verifyToken,verifyRole,adminDelete)
+router.route("/admin-delete/:id").delete(verifyToken,verifyRole,adminDelete)
 router.route("/admin-get-single/:id").get(verifyToken,verifyRole,adminGetSingle);
 
 

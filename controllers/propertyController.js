@@ -17,10 +17,8 @@ exports.adminDelete=async(req,resp)=>{
 
   try {
 
-    req.body.forEach(async(elm)=>{
-      await Property.findByIdAndDelete(elm._id);
-    })
-
+    await Property.findByIdAndDelete(req.params.id);
+    
     responseSend(resp,201,true,"Deleted Successfully");
 
   } catch (error) {
@@ -64,7 +62,7 @@ exports.adminGetSingle=async(req,resp)=>{
 }
 
 
-//To get minimum 8 properties per page
+//To get properties for admin
 exports.adminGetProperty=async(req,resp)=>{
   try {
 
@@ -183,7 +181,7 @@ exports.filterProperty = async (req, resp) => {
                   coordinates:[parseFloat(req.query.longitude),parseFloat(req.query.latitude)]
                 },
       
-                $maxDistance:req.query.radius
+                $maxDistance:parseInt(req.query.radius)
               }
             }
           }

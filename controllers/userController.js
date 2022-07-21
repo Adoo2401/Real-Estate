@@ -191,17 +191,32 @@ exports.delFavourite=async(req,resp)=>{
   }
 }
 
+//admin to get single user
+
+
+exports.adminGetSingleUser=async(req,resp)=>{
+
+  try {
+
+    let user=await User.findById(req.params.id);
+
+    responseSend(resp,200,true,user.role);
+    
+  } catch (error) {
+
+    responseSend(resp,500,false,error.message);
+
+  }
+}
+
 //For admin to get all the users
 
 exports.adminGetUsers=async(req,resp)=>{
 
   try {
     
-    let usersCount=await User.countDocuments();
-    let skip=req.query.skip?req.query.skip:0;
-
-    let users=await User.find().limit(8).skip(skip);
-    responseSend(resp,200,true,{users,usersCount});
+    let users=await User.find()
+    responseSend(resp,200,true,users);
 
   } catch (error) {
     responseSend(resp,500,false,error.message);
@@ -209,40 +224,16 @@ exports.adminGetUsers=async(req,resp)=>{
 }
 
 
-//For admin to search by user name
 
-exports.adminSearch=async(req,resp)=>{
-
-  try {
-
-    let {keyword,skip}=req.query;
-
-    let users=await User.find({name:{$regex:keyword,$options:'i'}}).limit(8).skip(skip);
-    let anotherUser=await User.find({name:{$regex:keyword,$options:'i'}})
-
-    let usersCount=anotherUser.length;
-    
-    responseSend(resp,200,true,{users,usersCount});
-
-    
-  } catch (error) {
-     responseSend(resp,500,false,error.message);  
-  }
-}
 
 
 //For admin to edit the role of the user
 
 exports.adminEdit=async(req,resp)=>{
 
-  try {
+  try{
 
-    
-    let {userId}=req.params
-    let {role}=req.body;
-
-    await User.findByIdAndUpdate(userId,{role});
-
+    await User.findByIdAndUpdate(req.params.id,{role:req.params.role});
     responseSend(resp,200,true,'Edit Successfully');
 
   } catch (error) {
@@ -257,10 +248,8 @@ exports.adminEdit=async(req,resp)=>{
 exports.adminDelete=async(req,resp)=>{
 
   try {
-
-     req.body.forEach(async(elm)=>{
-      await User.findByIdAndDelete(elm._id);
-    })
+      
+    await User.findByIdAndDelete(req.params.id);
 
     responseSend(resp,201,true,"Deleted Successfully");
 
