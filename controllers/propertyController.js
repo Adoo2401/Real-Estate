@@ -163,16 +163,16 @@ exports.filterProperty = async (req, resp) => {
     
     const property = await Property.find({
       $and: [
-        req.query.gt!==undefined ? { price: { $gte: req.query.gt } } : {},
-        req.query.lt!==undefined ? { price: { $lte: req.query.lt } } : {},
-        req.query.city!==undefined ? { city: req.query.city } : {},
-        req.query.propertySubType!==undefined
+        req.query.gt!=="undefined" ? { price: { $gte: req.query.gt } } : {},
+        req.query.lt!=="undefined" ? { price: { $lte: req.query.lt } } : {},
+        req.query.city!=="undefined" ? { city: req.query.city } : {},
+        req.query.propertySubType!=="undefined"
           ? { propertySubType: req.query.propertySubType }
           : {},
 
-        req.query.propertyType!==undefined ? { propertyType: req.query.propertyType } : {},
-        req.query.purpose!==undefined ? { purpose: req.query.purpose } : {},
-        req.query.latitude!==undefined && req.query.longitude!==undefined
+        req.query.propertyType!=="undefined" ? { propertyType: req.query.propertyType } : {},
+        req.query.purpose!=="undefined" ? { purpose: req.query.purpose } : {},
+        req.query.latitude!=="undefined" && req.query.longitude!=="undefined"
           ? {
             location:{
               $near:{
@@ -186,19 +186,19 @@ exports.filterProperty = async (req, resp) => {
             }
           }
           : {},
-        req.query.landAreaNumbergt!==undefined
+        req.query.landAreaNumbergt!=="undefined"
           ? { landAreaNumber: { $gte: req.query.landAreaNumbergt } }
           : {},
-        req.query.landAreaNumberlt!==undefined
+        req.query.landAreaNumberlt!=="undefined"
           ? { landAreaNumber: { $lte: req.query.landAreaNumberlt } }
           : {},
-        req.query.landAreaUnit!==undefined ? { landAreaUnit: req.query.landAreaUnit } : {},
-        req.query.bedroom!==undefined
+        req.query.landAreaUnit!=="undefined" ? { landAreaUnit: req.query.landAreaUnit } : {},
+        req.query.bedroom!=="undefined"
           ? req.query.bedroom === "10 "
             ? { bedroom: { $gte: 10 } }
             : { bedroom: req.query.bedroom }
           : {},
-        req.query.bathroom!==undefined
+        req.query.bathroom!=="undefined"
           ? req.query.bathroom === "6 "
             ? { bathroom: { $gte: 6 } }
             : { bathroom: req.query.bathroom }
