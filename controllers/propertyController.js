@@ -194,13 +194,13 @@ exports.filterProperty = async (req, resp) => {
           : {},
         req.query.landAreaUnit!=="undefined" ? { landAreaUnit: req.query.landAreaUnit } : {},
         req.query.bedroom!=="undefined"
-          ? req.query.bedroom === "10 "
+          ? req.query.bedroom === "10"
             ? { bedroom: { $gte: 10 } }
             : { bedroom: req.query.bedroom }
           : {},
         req.query.bathroom!=="undefined"
-          ? req.query.bathroom === "6 "
-            ? { bathroom: { $gte: 6 } }
+          ? req.query.bathroom === "10"
+            ? { bathroom: { $gte: 10 } }
             : { bathroom: req.query.bathroom }
           : {},
           {status:'active'}
