@@ -160,19 +160,31 @@ exports.addProperty = async (req, resp) => {
 
 exports.filterProperty = async (req, resp) => {
   try {
+
+    let gt=req.query.gt==='undefined'?undefined:req.query.gt;
+    let lt=req.query.lt==='undefined'?undefined:req.query.lt;
+    let city=req.query.city==='undefined'?undefined:req.query.city;
+    let propertySubType=req.query.propertySubType==='undefined'?undefined:req.query.propertySubType;
+    let propertyType=req.query.propertyType==='undefined'?undefined:req.query.propertyType
+    let landAreaNumbergt=req.query.landAreaNumbergt==='undefined'?undefined:req.query.landAreaNumbergt;
+    let landAreaNumberlt=req.query.landAreaNumberlt==='undefined'?undefined:req.query.landAreaNumberlt;
+    let landAreaUnit=req.query.landAreaUnit==='undefined'?undefined:req.query.landAreaUnit;
+    let bedroom=req.query.bedroom==='undefined'?undefined:req.query.bedroom;
+    let bathroom=req.query.bathroom==='undefined'?undefined:req.query.bathroom
+
     
     const property = await Property.find({
       $and: [
-        req.query.gt!=="undefined" ? { price: { $gte: req.query.gt } } : {},
-        req.query.lt!=="undefined" ? { price: { $lte: req.query.lt } } : {},
-        req.query.city!=="undefined" ? { city: req.query.city } : {},
-        req.query.propertySubType!=="undefined"
+        gt!==undefined ? { price: { $gte: req.query.gt } } : {},
+        lt!==undefined ? { price: { $lte: req.query.lt } } : {},
+        city!==undefined ? { city: req.query.city } : {},
+        propertySubType!==undefined
           ? { propertySubType: req.query.propertySubType }
           : {},
 
-        req.query.propertyType!=="undefined" ? { propertyType: req.query.propertyType } : {},
-        req.query.purpose!=="undefined" ? { purpose: req.query.purpose } : {},
-        req.query.latitude!=="undefined" && req.query.longitude!=="undefined"
+        propertyType!==undefined ? { propertyType: req.query.propertyType } : {},
+        req.query.purpose!==undefined ? { purpose: req.query.purpose } : {},
+        req.query.latitude!==undefined && req.query.longitude!==undefined
           ? {
             location:{
               $near:{
@@ -186,19 +198,19 @@ exports.filterProperty = async (req, resp) => {
             }
           }
           : {},
-        req.query.landAreaNumbergt!=="undefined"
+        landAreaNumbergt!==undefined
           ? { landAreaNumber: { $gte: req.query.landAreaNumbergt } }
           : {},
-        req.query.landAreaNumberlt!=="undefined"
+        landAreaNumberlt!==undefined
           ? { landAreaNumber: { $lte: req.query.landAreaNumberlt } }
           : {},
-        req.query.landAreaUnit!=="undefined" ? { landAreaUnit: req.query.landAreaUnit } : {},
-        req.query.bedroom!=="undefined"
+        landAreaUnit!==undefined ? { landAreaUnit: req.query.landAreaUnit } : {},
+        bedroom!==undefined
           ? req.query.bedroom === "10"
             ? { bedroom: { $gte: 10 } }
             : { bedroom: req.query.bedroom }
           : {},
-        req.query.bathroom!=="undefined"
+        bathroom!==undefined
           ? req.query.bathroom === "10"
             ? { bathroom: { $gte: 10 } }
             : { bathroom: req.query.bathroom }
