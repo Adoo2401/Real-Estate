@@ -136,10 +136,15 @@ exports.getProperty = async (req, resp) => {
 exports.addProperty = async (req, resp) => {
   try {
 
-    
-     let location=req.body.location;
-     delete req.body["location"];
+     let address=req.body.address;
+     let longitude=req.body.longitude;
+     let latitude=req.body.latitude;
 
+     delete req.body.longitude;
+     delete req.body.latitude;
+     delete req.body.address
+
+    
      req.body.purpose=req.body.purpose.toLowerCase();
      req.body.propertyType=req.body.propertyType.toLowerCase();
      req.body.propertySubType=req.body.propertySubType.toLowerCase();
@@ -224,7 +229,7 @@ exports.addProperty = async (req, resp) => {
       
      req.body.images=images;
 
-     const newProperty = await Property.create({...req.body,user:req.user._id,location:{type:"Point",address:location.address,coordinates:[parseFloat(location.coordinates[0]),parseFloat(location.coordinates[1])]}});
+     const newProperty = await Property.create({...req.body,user:req.user._id,location:{type:"Point",address:address,coordinates:[parseFloat(longitude),parseFloat(latitude)]}});
 
     responseSend(resp, 201, true, newProperty);
   } catch (error) {
