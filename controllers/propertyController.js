@@ -4,6 +4,8 @@ const Property = require("../models/propertyModel");
 const responseSend = require("../utils/response");
 const validator=require("validator");
 const User=require("../models/userModel");
+const cloudinary=require("cloudinary");
+const path=require("path");
 //}
 
 //creating main functions that will be called when the specific route will hit{
@@ -134,6 +136,7 @@ exports.getProperty = async (req, resp) => {
 exports.addProperty = async (req, resp) => {
   try {
 
+    
      let location=req.body.location;
      delete req.body["location"];
 
@@ -144,12 +147,87 @@ exports.addProperty = async (req, resp) => {
      req.body.propertyTitle=req.body.propertyTitle.toLowerCase();
      req.body.landAreaUnit=req.body.landAreaUnit.toLowerCase();
 
+     
+      let images=[];
+      let tempFilePath=[]
+
+      if(!req.files){
+        return resp.status(500).json({success:false,message:"Please choose property image to upload"})
+      }
+
+      if(req.files.propertyImage.length===undefined){
+         
+        const extensionName = path.extname(req.files.propertyImage.name); // fetch the file extension
+     
+        const allowedExtension = ['.png','.jpg','.jpeg'];
+
+        if(!allowedExtension.includes(extensionName)){
+
+         return resp.status(422).json({success:false,message:"Invalid Image Please Choose png jpg and jpeg images"});
+
+         }
+         
+        if(req.files.propertyImage.size>5000000){
+          return resp.status(422).json({success:false,message:"Please Choose Image less than 5MB"});
+        }
+
+        const result=await cloudinary.v2.uploader.upload(req.files.propertyImage.tempFilePath,{
+          folder:"images"
+        })
+  
+        images.push({
+          public_id:result.public_id,
+          url:result.secure_url
+        })
+
+      }else{
+
+        for(let i=0;i<req.files.propertyImage.length;i++){
+
+          const extensionName = path.extname(req.files.propertyImage[i].name); // fetch the file extension
+    
+          const allowedExtension = ['.png','.jpg','.jpeg'];
+
+          if(!allowedExtension.includes(extensionName)){
+           
+            return resp.status(422).json({success:false,message:"Invalid Image Please Choose png jpg and jpeg images"}); 
+
+           }
+           
+          if(req.files.propertyImage[i].size>5000000){
+            
+            return resp.status(422).json({success:false,message:"Please Choose Image less than 5MB"}); 
+          }
+
+          tempFilePath.push(req.files.propertyImage[i].tempFilePath)
+        }
+
+      }
+
+      if(tempFilePath.length>0){
+
+        for(let i=0;i<tempFilePath.length;i++){
+
+          const result=await cloudinary.v2.uploader.upload(tempFilePath[i],{
+            folder:"images"
+          })
+    
+          images.push({
+            public_id:result.public_id,
+            url:result.secure_url
+          })
+
+        }
+
+      }
+     
+      
+     req.body.images=images;
 
      const newProperty = await Property.create({...req.body,user:req.user._id,location:{type:"Point",address:location.address,coordinates:[parseFloat(location.coordinates[0]),parseFloat(location.coordinates[1])]}});
 
     responseSend(resp, 201, true, newProperty);
   } catch (error) {
-    
     responseSend(resp, 500, false, error);
   }
 };
