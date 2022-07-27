@@ -166,7 +166,8 @@ exports.filterProperty = async (req, resp) => {
     let city=req.query.city==='undefined'?undefined:req.query.city;
     let propertySubType=req.query.propertySubType==='undefined'?undefined:req.query.propertySubType;
     let propertyType=req.query.propertyType==='undefined'?undefined:req.query.propertyType
-    let landAreaNumber=req.query.landAreaNumber==='undefined'?undefined:req.query.landAreaNumber;
+    let landAreaNumbergt=req.query.landAreaNumbergt==='undefined'?undefined:req.query.landAreaNumbergt;
+    let landAreaNumberlt=req.query.landAreaNumberlt==='undefined'?undefined:req.query.landAreaNumberlt;
     let landAreaUnit=req.query.landAreaUnit==='undefined'?undefined:req.query.landAreaUnit;
     let bedroom=req.query.bedroom==='undefined'?undefined:req.query.bedroom;
     let bathroom=req.query.bathroom==='undefined'?undefined:req.query.bathroom
@@ -197,9 +198,11 @@ exports.filterProperty = async (req, resp) => {
             }
           }
           : {},
-        landAreaNumber!==undefined
-          ? { landAreaNumber:parseInt(req.query.landAreaNumber)}
+          landAreaNumbergt!==undefined
+          ? { landAreaNumber: { $gte: req.query.landAreaNumbergt } }
           : {},
+        landAreaNumberlt!==undefined
+          ? { landAreaNumber: { $lte: req.query.landAreaNumberlt } }:{},
         landAreaUnit!==undefined ? { landAreaUnit: req.query.landAreaUnit } : {},
         bedroom!==undefined
           ? req.query.bedroom === "10"
