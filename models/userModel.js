@@ -37,7 +37,8 @@ const userSchema = new mongoose.Schema({
     required:true,
     default:"user"
   },
-  favourites:[]
+  favourites:[],
+  recent:[],
 
  
 });

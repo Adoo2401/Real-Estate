@@ -259,3 +259,58 @@ exports.adminDelete=async(req,resp)=>{
 
   }
 }
+
+// To add the property to user recents when user view click or call the property
+
+exports.recent=async(req,resp)=>{
+
+  try {
+    let user=await User.findById(req.user._id);
+
+    let check=user.recent.filter((elm)=> elm.toString()===req.params.propertyId);
+
+    if(check.length>0){
+      return resp.status(422).json({success:false,message:'Only in recents of user'});
+    }
+
+    if(user.recent.length==5){
+
+      let randomNumber=Math.floor(Math.random()*5);
+      user.recent[randomNumber]=req.params.propertyId;
+      await user.save();
+      return  resp.status(201).json({success:true,message:"Added in recents of user"});
+
+    }
+
+    user.recent.push(req.params.propertyId);
+
+    await user.save();
+
+    resp.status(201).json({success:true,message:"Added in recents of user"});
+    
+  } catch (error) {
+    responseSend(resp,500,false,error.message);
+  }
+}
+
+//To get the user recent interacted Properties
+
+exports.getRecent=async(req,resp)=>{
+
+  try {
+    
+   let recentProperties=[];
+
+   for(let i=0;i<req.user.recent.length;i++){
+
+    let property= await Property.findById(req.user.recent[i]);
+    recentProperties.push(property);
+
+   }
+
+   resp.status(200).json({success:true,message:recentProperties});
+
+  } catch (error) {
+    responseSend(resp,500,false,error.message);
+  }
+}

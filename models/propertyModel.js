@@ -109,8 +109,6 @@ const propertySchema = new mongoose.Schema({
   views:[],
   clicks:[],
   calls:[],
-
-  //images and the user added by will be added later
 });
 //}
 
