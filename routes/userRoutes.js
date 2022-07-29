@@ -1,5 +1,5 @@
 const express = require("express");
-const { RegisterUser, loginUser,addFavourite, getFavourites, delFavourite, adminGetUsers, adminEdit, adminDelete, adminGetSingleUser, recent, getRecent } = require("../controllers/userController");
+const { RegisterUser, loginUser,addFavourite, getFavourites, delFavourite, adminGetUsers, adminEdit, adminDelete, adminGetSingleUser, recent, getRecent, deleteNotification } = require("../controllers/userController");
 const verifyRole = require("../middlewares/verifyRole");
 const verifyToken = require("../middlewares/verifyToken");
 const router = express.Router();
@@ -13,6 +13,7 @@ router.route("/get_fav").get(verifyToken,getFavourites);
 router.route('/del_fav/:property_id').delete(verifyToken,delFavourite);
 router.route("/recents/:propertyId").post(verifyToken,recent);
 router.route("/getRecent").get(verifyToken,getRecent);
+router.route("/deleteNotification/:notificationId").delete(verifyToken,deleteNotification)
 
 //admin routes
 

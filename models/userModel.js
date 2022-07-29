@@ -39,7 +39,20 @@ const userSchema = new mongoose.Schema({
   },
   favourites:[],
   recent:[],
+  
+  notifications:[
 
+    {
+        message:{
+            type:String,
+        },
+
+        propertyId:{
+            type:mongoose.Schema.ObjectId,
+            ref:"Product",
+        },      
+    }
+]
  
 });
 

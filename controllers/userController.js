@@ -4,6 +4,7 @@ const bcrypt=require("bcrypt");
 const validator=require("validator");
 const jsonwebtoken=require("jsonwebtoken");
 const Property=require("../models/propertyModel");
+const { ObjectID } = require("bson");
 
 // To register the user{
 
@@ -311,6 +312,23 @@ exports.getRecent=async(req,resp)=>{
    resp.status(200).json({success:true,message:recentProperties});
 
   } catch (error) {
+    responseSend(resp,500,false,error.message);
+  }
+}
+
+//For logged in user to delete his notifications
+
+
+exports.deleteNotification=async(req,resp)=>{
+  try {
+    
+    let result=await User.findByIdAndUpdate(req.params._id,{$pull:{notifications:{_id:ObjectID(req.params.notificationId)}}})
+    console.log(result);
+    resp.status(201).json({success:true,message:"Notification Deleted"});
+
+    
+  } catch (error) {
+    console.log(error)
     responseSend(resp,500,false,error.message);
   }
 }

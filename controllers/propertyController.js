@@ -35,7 +35,17 @@ exports.adminDelete=async(req,resp)=>{
 
 exports.adminEdit=async(req,resp)=>{
   try {
-    await Property.findByIdAndUpdate(req.params.id,req.body);
+  
+    let property=await Property.findByIdAndUpdate(req.params.id,req.body);
+    let propertyUser=await User.findById(property.user);
+
+    propertyUser.notifications.push({
+
+      message:`Your Property ${property.propertyTitle} has been ${req.body.status}`,
+      propertyId:req.params.id
+    })
+
+    await propertyUser.save();
 
     responseSend(resp,201,true,"Updated");
     
@@ -342,7 +352,16 @@ exports.updateProperty=async(req,resp)=>{
 
   try {
     
-    const property=await Property.updateOne({_id:req.params.property_id,user:req.user._id},req.body).clone();
+     let address=req.body.address;
+     let longitude=req.body.longitude;
+     let latitude=req.body.latitude;
+
+     delete req.body.longitude;
+     delete req.body.latitude;
+     delete req.body.address
+
+
+    const property=await Property.updateOne({_id:req.params.property_id,user:req.user._id},{...req.body,location:{type:"Point",address:address,coordinates:[parseFloat(longitude),parseFloat(latitude)]}}).clone();
 
     
 
