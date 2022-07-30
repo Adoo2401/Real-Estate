@@ -5,6 +5,7 @@ const responseSend = require("../utils/response");
 const User=require("../models/userModel");
 const cloudinary=require("cloudinary");
 const path=require("path");
+const pushNotification = require("../utils/pushNotification");
 //}
 
 //creating main functions that will be called when the specific route will hit{
@@ -41,6 +42,14 @@ exports.adminEdit=async(req,resp)=>{
     let property=await Property.findByIdAndUpdate(req.params.id,req.body);
     
     await sendNotification(property.user,{message:`The Status of your Property '${property.propertyTitle}' has been changed to ${req.body.status}`,propertyId:req.params.id})
+
+    let result=pushNotification(req.user.token,`Your property ${property.propertyTitle} has been changed to ${req.body.status}`);
+
+    if(result!==true){
+      console.log(result);
+    }else{
+      console.log('notification Send')
+    }
     
     responseSend(resp,200,true,'Updated');
 
