@@ -52,7 +52,9 @@ const userSchema = new mongoose.Schema({
             ref:"Product",
         },      
     }
-]
+],
+
+   token:{type:String}
  
 });
 

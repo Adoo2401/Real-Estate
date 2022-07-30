@@ -1,8 +1,7 @@
 //importing some usefull moduels{
-const mongoose = require("mongoose");
+const sendNotification=require("../utils/sendNotification");
 const Property = require("../models/propertyModel");
 const responseSend = require("../utils/response");
-const validator=require("validator");
 const User=require("../models/userModel");
 const cloudinary=require("cloudinary");
 const path=require("path");
@@ -19,8 +18,11 @@ exports.adminDelete=async(req,resp)=>{
 
   try {
 
-    await Property.findByIdAndDelete(req.params.id);
+    let property=await Property.findById(req.params.id);
     
+    await sendNotification(property.user,{message:`Your Property '${property.propertyTitle}' has been Deleted By Admin`,propertyId:req.params.id})
+    await Property.findByIdAndDelete(req.params.id);
+
     responseSend(resp,201,true,"Deleted Successfully");
 
   } catch (error) {
@@ -37,18 +39,10 @@ exports.adminEdit=async(req,resp)=>{
   try {
   
     let property=await Property.findByIdAndUpdate(req.params.id,req.body);
-    let propertyUser=await User.findById(property.user);
-
-    propertyUser.notifications.push({
-
-      message:`Your Property ${property.propertyTitle} has been ${req.body.status}`,
-      propertyId:req.params.id
-    })
-
-    await propertyUser.save();
-
-    responseSend(resp,201,true,"Updated");
     
+    await sendNotification(property.user,{message:`The Status of your Property '${property.propertyTitle}' has been changed to ${req.body.status}`,propertyId:req.params.id})
+    
+    responseSend(resp,200,true,'Updated');
 
   } catch (error) {
 
@@ -361,9 +355,7 @@ exports.updateProperty=async(req,resp)=>{
      delete req.body.address
 
 
-    const property=await Property.updateOne({_id:req.params.property_id,user:req.user._id},{...req.body,location:{type:"Point",address:address,coordinates:[parseFloat(longitude),parseFloat(latitude)]}}).clone();
-
-    
+    const property=await Property.updateOne({_id:req.params.property_id,user:req.user._id},{...req.body,location:{type:"Point",address:address,coordinates:[parseFloat(longitude),parseFloat(latitude)]},status:'pending'}).clone();
 
     if(property.matchedCount==0){
       return responseSend(resp,500,false,"Property Cannot be updated")

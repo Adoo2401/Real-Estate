@@ -4,7 +4,7 @@ const bcrypt=require("bcrypt");
 const validator=require("validator");
 const jsonwebtoken=require("jsonwebtoken");
 const Property=require("../models/propertyModel");
-const { ObjectID } = require("bson");
+
 
 // To register the user{
 
@@ -322,13 +322,31 @@ exports.getRecent=async(req,resp)=>{
 exports.deleteNotification=async(req,resp)=>{
   try {
     
-    let result=await User.findByIdAndUpdate(req.params._id,{$pull:{notifications:{_id:ObjectID(req.params.notificationId)}}})
-    console.log(result);
+    await User.updateOne({_id:req.user._id},{$pull:{notifications:{_id:req.params.notificationId}}})
+    
     resp.status(201).json({success:true,message:"Notification Deleted"});
 
-    
   } catch (error) {
-    console.log(error)
+    
+    responseSend(resp,500,false,error.message);
+  }
+}
+
+//To get the fcm token from front-end
+
+exports.getFCMToken=async(req,resp)=>{
+
+  try {
+    
+    let user=await User.findById(req.user._id);
+
+    user.token=req.body.token;
+
+    user.save();
+
+    responseSend(resp,201,true,'Token Saved')
+
+  } catch (error) {
     responseSend(resp,500,false,error.message);
   }
 }
