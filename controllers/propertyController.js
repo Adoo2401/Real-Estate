@@ -39,11 +39,13 @@ exports.adminDelete=async(req,resp)=>{
 exports.adminEdit=async(req,resp)=>{
   try {
   
-    let property=await Property.findByIdAndUpdate(req.params.id,req.body);
     
+    
+    let property=await Property.findByIdAndUpdate(req.params.id,req.body);
+    let user=await User.findById(property.user)
     await sendNotification(property.user,{message:`The Status of your Property '${property.propertyTitle}' has been changed to ${req.body.status}`,propertyId:req.params.id})
 
-    let result=pushNotification(req.user.token,`Your property ${property.propertyTitle} has been changed to ${req.body.status}`);
+    let result=pushNotification(user.token,`Your property ${property.propertyTitle} has been changed to ${req.body.status}`);
 
     if(result!==true){
       console.log(result);
@@ -55,6 +57,7 @@ exports.adminEdit=async(req,resp)=>{
 
   } catch (error) {
 
+    console.log(error);
     responseSend(resp,500,false,"Something Went Wrong");
 
   }

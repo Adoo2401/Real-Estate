@@ -1,8 +1,9 @@
-const admin=require("firebase-admin");
+const {admin}=require("../config/firebase");
 
 
 const pushNotification=(token,message)=>{
 
+    console.log(token);
     const notificationOptions={
 
         priority:"high",
@@ -18,7 +19,7 @@ const pushNotification=(token,message)=>{
                }
         };
 
-    admin.messaging().sendToDevice(token,message_notification,notificationOptions).then(()=> true).catch((error)=>error);
+    admin.messaging().sendToDevice(token,message_notification,notificationOptions).then(()=> true).catch((error)=>console.log(error));
 
 }
 
