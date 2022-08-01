@@ -6,6 +6,7 @@ const User=require("../models/userModel");
 const cloudinary=require("cloudinary");
 const path=require("path");
 const pushNotification = require("../utils/pushNotification");
+const sendToAdmin = require("../utils/sendToAdmin");
 //}
 
 //creating main functions that will be called when the specific route will hit{
@@ -20,14 +21,20 @@ exports.adminDelete=async(req,resp)=>{
   try {
 
     let property=await Property.findById(req.params.id);
-    
+    let user=await User.findById(property.user);
+   
     await sendNotification(property.user,{message:`Your Property '${property.propertyTitle}' has been Deleted By Admin`,propertyId:req.params.id})
+    
+    if(user.token){
+      pushNotification(user.token,`Your Property '${property.propertyTitle}' has been Deleted By Admin`)
+    }
+
     await Property.findByIdAndDelete(req.params.id);
 
     responseSend(resp,201,true,"Deleted Successfully");
 
   } catch (error) {
-    
+    console.log(error)
     responseSend(resp,500,false,"Something Went Wrong");
 
   }
@@ -38,26 +45,19 @@ exports.adminDelete=async(req,resp)=>{
 
 exports.adminEdit=async(req,resp)=>{
   try {
-  
-    
-    
+
     let property=await Property.findByIdAndUpdate(req.params.id,req.body);
     let user=await User.findById(property.user)
     await sendNotification(property.user,{message:`The Status of your Property '${property.propertyTitle}' has been changed to ${req.body.status}`,propertyId:req.params.id})
 
-    let result=pushNotification(user.token,`Your property ${property.propertyTitle} has been changed to ${req.body.status}`);
+    if(user.token){
+      pushNotification(user.token,`Your property ${property.propertyTitle} has been changed to ${req.body.status}`); 
 
-    if(result!==true){
-      console.log(result);
-    }else{
-      console.log('notification Send')
     }
-    
     responseSend(resp,200,true,'Updated');
 
   } catch (error) {
-
-    console.log(error);
+    
     responseSend(resp,500,false,"Something Went Wrong");
 
   }
@@ -247,8 +247,11 @@ exports.addProperty = async (req, resp) => {
 
      const newProperty = await Property.create({...req.body,user:req.user._id,location:{type:"Point",address:address,coordinates:[parseFloat(longitude),parseFloat(latitude)]}});
 
+    await sendToAdmin(`A new property has been added ${newProperty.propertyTitle}`,newProperty._id);
+
     responseSend(resp, 201, true, newProperty);
   } catch (error) {
+    console.log(error)
     responseSend(resp, 500, false, error);
   }
 };
@@ -373,11 +376,12 @@ exports.updateProperty=async(req,resp)=>{
       return responseSend(resp,500,false,"Property Cannot be updated")
     }
 
+    await sendToAdmin(`A property has been Updated`,req.params.property_id)
+
     responseSend(resp,200,true,'Property Updated');
 
 
   } catch (error) {
-  
     responseSend(resp,500,false,"Something Went Wrong")
     
   }

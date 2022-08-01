@@ -3,7 +3,7 @@ const {admin}=require("../config/firebase");
 
 const pushNotification=(token,message)=>{
 
-    console.log(token);
+   
     const notificationOptions={
 
         priority:"high",

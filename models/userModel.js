@@ -50,7 +50,12 @@ const userSchema = new mongoose.Schema({
         propertyId:{
             type:mongoose.Schema.ObjectId,
             ref:"Product",
-        },      
+        }, 
+        
+        seen:{
+          type:Boolean,
+          default:false
+        },
     }
 ],
 

@@ -327,7 +327,7 @@ exports.deleteNotification=async(req,resp)=>{
     resp.status(201).json({success:true,message:"Notification Deleted"});
 
   } catch (error) {
-    
+
     responseSend(resp,500,false,error.message);
   }
 }
@@ -347,6 +347,19 @@ exports.getFCMToken=async(req,resp)=>{
     responseSend(resp,201,true,'Token Saved')
 
   } catch (error) {
+    responseSend(resp,500,false,error.message);
+  }
+}
+
+//To get nofifications for admin
+
+exports.adminNotification=async(req,resp)=>{
+
+  try{
+
+    responseSend(resp,200,true,req.user.notifications.reverse())
+
+  } catch(error) {
     responseSend(resp,500,false,error.message);
   }
 }
