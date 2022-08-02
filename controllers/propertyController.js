@@ -34,7 +34,7 @@ exports.adminDelete=async(req,resp)=>{
     responseSend(resp,201,true,"Deleted Successfully");
 
   } catch (error) {
-    console.log(error)
+    
     responseSend(resp,500,false,"Something Went Wrong");
 
   }
