@@ -1,13 +1,14 @@
 const Chat=require("../models/chatModel");
 const User=require("../models/userModel");
 const Pusher=require("pusher");
+const { ObjectId } = require("mongodb");
 
 
 let pusher=new Pusher({
-    appId:"1456926",
-    key:"e0d345cf5234e5e06e52",
-    secret:"ab02bb526e6eb9d3683b",
-    cluster:"ap2",
+    appId:process.env.PUSHER_APP_ID,
+    key:process.env.PUSHER_APP_KEY,
+    secret:process.env.PUSHER_APP_SECRET,
+    cluster:process.env.PUSHER_APP_CLUSTER
 })
 
 exports.getMessages=async(req,resp)=>{
@@ -17,7 +18,7 @@ exports.getMessages=async(req,resp)=>{
 
         let from=req.user._id.toString();
 
-        const message= await Chat.find({users:{$all:[from,to]}}).sort({updatedAt:1});
+        const message= await Chat.find({users:{$all:[from,to]},show:{$in:[from]}}).sort({updatedAt:1});
 
         const projectMessages=message.map((msg)=>{
             return {
@@ -47,9 +48,10 @@ exports.addMessage=async(req,resp)=>{
         let channel=from+to
         
 
-        await Chat.create({message:{text:message},users:[from,to],sender:from});
+        await Chat.create({message:{text:message},users:[from,to],sender:from,show:[from,to]});
 
         await pusher.trigger(channel,'message',{hi:channel})
+        
 
         resp.status(201).json({success:true,message:'Messeage Sent succesfully'});
 
@@ -67,7 +69,7 @@ exports.getSingle=async(req,resp)=>{
 
         let array=[];
 
-        let check=await Chat.find({user:{$in:[req.user._id]}});
+        let check=await Chat.find({user:{$in:[req.user._id]},show:{$in:[req.user._id.toString()]}});
    
         for(let i=0;i<check.length;i++){
 
@@ -92,21 +94,37 @@ exports.getSingle=async(req,resp)=>{
         for(let i=0;i<uniqueArray.length;i++){
 
          
-         let chat=await Chat.findOne(({users:{$in:[uniqueArray[i]]}})).sort({updatedAt:-1})
-          
+         let chat=await Chat.findOne({users:{$in:[uniqueArray[i]]},show:{$in:req.user._id.toString()}}).sort({updatedAt:-1})
+         
          let userDetail=await User.findById(uniqueArray[i]);
          
 
           final.push({
              message:chat.message.text,
             user:userDetail.name,
-            _id:userDetail._id,
+            _id:userDetail._id
           });
 
         }
 
         resp.status(200).json({success:true,message:final})
         
+    } catch (error) {
+        resp.status(500).json({success:false,message:error.message});
+    }
+}
+
+exports.deleteMessage=async(req,resp)=>{
+
+    try {
+
+        let loginUserId=req.user._id.toString();
+
+        await Chat.updateMany({users:{$all:[loginUserId,req.params.userId]}},{$pullAll:{show:[loginUserId]}});
+
+        resp.status(201).json({success:true,message:"Deleted Successfully"});
+
+
     } catch (error) {
         resp.status(500).json({success:false,message:error.message});
     }

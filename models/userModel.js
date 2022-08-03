@@ -59,7 +59,13 @@ const userSchema = new mongoose.Schema({
     }
 ],
 
-   token:{type:String}
+   token:{type:String},
+
+   setting:{
+    notification:{type:Boolean,required:true,default:true},
+    featuredAd:{type:Boolean,required:true,default:true},
+    viewAdd:{type:Boolean,required:true,default:true},
+   }
  
 });
 

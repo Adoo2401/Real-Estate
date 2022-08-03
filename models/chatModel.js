@@ -17,6 +17,8 @@ const messageSchema=new mongoose.Schema({
             ref:'User',
             required:true
         },
+
+        show:Array
     
 },{timestamps:true})
 
