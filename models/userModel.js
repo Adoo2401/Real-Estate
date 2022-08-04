@@ -64,7 +64,7 @@ const userSchema = new mongoose.Schema({
    setting:{
     notification:{type:Boolean,required:true,default:true},
     featuredAd:{type:Boolean,required:true,default:true},
-    viewAdd:{type:Boolean,required:true,default:true},
+    viewAd:{type:Boolean,required:true,default:true},
    }
  
 });

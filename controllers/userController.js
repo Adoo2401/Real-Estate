@@ -363,3 +363,23 @@ exports.adminNotification=async(req,resp)=>{
     responseSend(resp,500,false,error.message);
   }
 }
+
+//To update user settings
+
+exports.updateSetting=async(req,resp)=>{
+
+  try {
+    
+    let {notification,featuredAd,viewAd}=req.body;
+
+    await User.findByIdAndUpdate(req.user._id,
+      {$set:
+        {'setting.notification':notification,'setting.featuredAd':featuredAd,'setting.viewAd':viewAd}
+      })
+
+    resp.status(201).json({success:true,message:"Updated"})
+
+  } catch (error) {
+    responseSend(resp,500,false,error.message);
+  }
+}
