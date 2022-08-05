@@ -1,15 +1,8 @@
 const Chat=require("../models/chatModel");
 const User=require("../models/userModel");
-const Pusher=require("pusher");
 const { ObjectId } = require("mongodb");
+const pusher=require("../config/pusher");
 
-
-let pusher=new Pusher({
-    appId:process.env.PUSHER_APP_ID,
-    key:process.env.PUSHER_APP_KEY,
-    secret:process.env.PUSHER_APP_SECRET,
-    cluster:process.env.PUSHER_APP_CLUSTER
-})
 
 exports.getMessages=async(req,resp)=>{
     try {

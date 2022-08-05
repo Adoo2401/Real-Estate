@@ -1,6 +1,9 @@
 const User=require("../models/userModel");
+const pusher=require("../config/pusher");
 
 const sendToAdmin=async(message,propertyId)=>{
+
+    await pusher.trigger('admin-notification','update-notification',{data:'update'});
 
     let admin=await User.find({role:"admin"});
 
@@ -10,6 +13,8 @@ const sendToAdmin=async(message,propertyId)=>{
       await admin[i].save()
 
      }
+
+    
 }
 
 module.exports=sendToAdmin

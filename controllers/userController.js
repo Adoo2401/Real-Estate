@@ -15,9 +15,14 @@ try {
     let {password,email,name,phone,city,registerAs}=req.body;
 
     const checkEmail=await User.findOne({email});
+    const checkPhone=await User.findOne({phone});
 
     if(checkEmail){
       return responseSend(resp,500,false,'Email Already Exist')
+    }
+
+    if(checkPhone){
+      return responseSend(resp,500,false,'Phone Number Already Exist')
     }
     
     if(!password || !email || !name || !phone){
@@ -64,7 +69,7 @@ exports.loginUser=async(req,resp)=>{
     }
 
     if(!validator.isEmail(req.body.email)){
-      return  responseSend(resp,500,false,"Please Enter A vallid Email");
+      return  responseSend(resp,500,false,"Please Enter A valid Email");
      }
 
     
@@ -379,6 +384,147 @@ exports.updateSetting=async(req,resp)=>{
 
     resp.status(201).json({success:true,message:"Updated"})
 
+  } catch (error) {
+    responseSend(resp,500,false,error.message);
+  }
+}
+
+
+//To get The settings of login user
+
+exports.getSetting=async(req,resp)=>{
+
+  try {
+    
+    let user=await User.findById(req.user._id);
+
+    responseSend(resp,200,true,user.setting);
+
+  } catch (error) {
+    responseSend(resp,500,false,error.message);
+  }
+}
+
+//To update the seen of the notifications of admn or users
+
+exports.updateNotification=async(req,resp)=>{
+
+  try {
+  
+  let user=await User.findById(req.user._id);
+
+  for(let i=0;i<user.notifications.length;i++){
+
+    user.notifications[i].seen=true;
+
+  }
+
+  await user.save();
+
+  responseSend(resp,201,true,'Updated');
+
+  } catch (error) {
+    responseSend(resp,500,false,error.message);
+  }
+}
+
+//To get any unseen notification for user
+
+exports.getUnseenNotification=async(req,resp)=>{
+
+  try {
+
+    let notification=await User.find({_id:req.user._id,'notifications.seen':false});
+
+    if(notification.length>0){
+
+      return responseSend(resp,200,true,false);
+
+    }
+
+    responseSend(resp,200,true,true);
+     
+  } catch (error) {
+    responseSend(resp,500,false,error.message);
+  }
+}
+
+
+//To update the user password
+
+exports.updatePassword=async(req,resp)=>{
+  try {
+    
+    let {password,oldPassword}=req.body;
+
+    let user=await User.findById(req.user._id).select("+password");
+   
+    let check=await bcrypt.compare(oldPassword,user.password);
+
+    if(!check){
+      return responseSend(resp,500,false,"Password Do Not Match");
+    }
+
+    if(!validator.isLength(password,{min:8,max:15})){
+      return responseSend(resp,500,false,"Password Should be minimun 8 characters and maximun 15")
+    }
+
+    let hashPassword=await bcrypt.hash(password,10);
+
+    await User.findByIdAndUpdate(req.user._id,{password:hashPassword});
+
+    responseSend(resp,201,true,'Password Updated');
+  
+  } catch (error) {
+    responseSend(resp,500,false,error.message);
+  }
+}
+
+//TO UPDATE THE USER EMAIL  
+
+exports.updateEmail=async(req,resp)=>{
+
+  try {
+  
+    let {email}=req.body;
+
+    const checkEmail=await User.findOne({email});
+
+    if(checkEmail){
+      return responseSend(resp,500,false,"Email Already exists");
+    }
+
+    if(!validator.isEmail(email)){
+      return  responseSend(resp,500,false,"Please Enter A vallid Email");
+     }
+
+     await User.findByIdAndUpdate(req.user._id,{email});
+
+     responseSend(resp,201,true,'Email Updated');
+
+
+  } catch (error) {
+    responseSend(resp,500,false,error.message);
+  }
+}
+
+//To update the phone Number
+
+exports.updatePhone=async(req,resp)=>{
+  try {
+
+    let {phone}=req.body;
+
+    const checkPhone=await User.findOne({phone});
+
+    if(checkPhone){
+      return responseSend(resp,500,false,'Phone Number Already Exist')
+    }
+
+    await User.findByIdAndUpdate(req.user._id,{phone});
+
+    responseSend(resp,201,true,"Phone Number Updated");
+    
   } catch (error) {
     responseSend(resp,500,false,error.message);
   }
