@@ -10,7 +10,7 @@ const sendToAdmin=async(message,propertyId)=>{
      for(let i=0;i<admin.length;i++){
 
       admin[i].notifications.push({message,propertyId})
-      await admin[i].save()
+      await admin[i].save({validateBeforeSave:false})
 
      }
 

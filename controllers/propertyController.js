@@ -1,5 +1,4 @@
 //importing some usefull moduels{
-const sendNotification=require("../utils/sendNotification");
 const Property = require("../models/propertyModel");
 const responseSend = require("../utils/response");
 const User=require("../models/userModel");
@@ -22,14 +21,12 @@ exports.adminDelete=async(req,resp)=>{
 
     let property=await Property.findById(req.params.id);
     let user=await User.findById(property.user);
-   
-    await sendNotification(property.user,{message:`Your Property '${property.propertyTitle}' has been Deleted By Admin`,propertyId:req.params.id})
-    
-    if(user.token){
+       
+    await Property.findByIdAndDelete(req.params.id);
+
+    if(user.token && user.setting.notification===true){
       pushNotification(user.token,`Your Property '${property.propertyTitle}' has been Deleted By Admin`)
     }
-
-    await Property.findByIdAndDelete(req.params.id);
 
     responseSend(resp,201,true,"Deleted Successfully");
 
@@ -48,12 +45,11 @@ exports.adminEdit=async(req,resp)=>{
 
     let property=await Property.findByIdAndUpdate(req.params.id,req.body);
     let user=await User.findById(property.user)
-    await sendNotification(property.user,{message:`The Status of your Property '${property.propertyTitle}' has been changed to ${req.body.status}`,propertyId:req.params.id})
 
-    if(user.token){
+    if(user.token && user.setting.notification===true){
       pushNotification(user.token,`Your property ${property.propertyTitle} has been changed to ${req.body.status}`); 
-
     }
+
     responseSend(resp,200,true,'Updated');
 
   } catch (error) {
@@ -251,7 +247,7 @@ exports.addProperty = async (req, resp) => {
 
     responseSend(resp, 201, true, newProperty);
   } catch (error) {
-    console.log(error)
+   
     responseSend(resp, 500, false, error);
   }
 };
@@ -633,7 +629,33 @@ exports.recentlyAdded=async(req,resp)=>{
   }
 }
 
-
- 
-
 //}
+
+// For admin to get all the properties added in a single year
+
+exports.getYearProperty=async(req,resp)=>{
+
+  try {
+
+    let currentYear=new Date().getFullYear();
+    let fourthYear=currentYear -1;
+    let thirdYear=fourthYear -1;
+    let secondYear=thirdYear-1;
+    let firstYear=secondYear-1;
+
+    let data=[];
+
+    let property1=await Property.find({added:{$gte:new Date(`${currentYear}-01-1`),$lte:new Date(`${currentYear}-12-31`)}});
+    let property2=await Property.find({added:{$gte:new Date(`${fourthYear}-01-1`),$lte:new Date(`${fourthYear}-12-31`)}});
+    let property3=await Property.find({added:{$gte:new Date(`${thirdYear}-01-1`),$lte:new Date(`${thirdYear}-12-31`)}});
+    let property4=await Property.find({added:{$gte:new Date(`${secondYear}-01-1`),$lte:new Date(`${secondYear}-12-31`)}});
+    let property5=await Property.find({added:{$gte:new Date(`${firstYear}-01-1`),$lte:new Date(`${firstYear}-12-31`)}});
+    
+    data.push({x:new Date(currentYear,0,1),y:property1.length},{x:new Date(fourthYear,0,1),y:property2.length},{x:new Date(thirdYear,0,1),y:property3.length},{x:new Date(secondYear,0,1),y:property4.length},{x:new Date(firstYear,0,1),y:property5.length});
+
+    responseSend(resp,200,true,data.reverse());
+
+  } catch (error) {
+    responseSend(resp,500,false,error.message);
+  }
+}

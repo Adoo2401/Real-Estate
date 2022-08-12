@@ -2,7 +2,7 @@ const Chat=require("../models/chatModel");
 const User=require("../models/userModel");
 const { ObjectId } = require("mongodb");
 const pusher=require("../config/pusher");
-
+const pushNotification=require("../utils/pushNotification");
 
 exports.getMessages=async(req,resp)=>{
     try {
@@ -34,7 +34,6 @@ exports.getMessages=async(req,resp)=>{
 exports.addMessage=async(req,resp)=>{
     try {
         
-
         const {to,message}=req.body
         let from=req.user._id.toString();
 
@@ -45,6 +44,11 @@ exports.addMessage=async(req,resp)=>{
 
         await pusher.trigger(channel,'message',{hi:channel})
         
+        let reciever=await User.findById(to);
+
+        if(reciever.token && reciever.setting.notification===true){
+             pushNotification(reciever.token,`You have a new message from ${req.user.name}`)
+        }
 
         resp.status(201).json({success:true,message:'Messeage Sent succesfully'});
 

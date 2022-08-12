@@ -283,14 +283,14 @@ exports.recent=async(req,resp)=>{
 
       let randomNumber=Math.floor(Math.random()*5);
       user.recent[randomNumber]=req.params.propertyId;
-      await user.save();
+      await user.save({validateBeforeSave:false});
       return  resp.status(201).json({success:true,message:"Added in recents of user"});
 
     }
 
     user.recent.push(req.params.propertyId);
 
-    await user.save();
+    await user.save({validateBeforeSave:false});
 
     resp.status(201).json({success:true,message:"Added in recents of user"});
     
@@ -347,7 +347,7 @@ exports.getFCMToken=async(req,resp)=>{
 
     user.token=req.body.token;
 
-    user.save();
+    user.save({validateBeforeSave:false});
 
     responseSend(resp,201,true,'Token Saved')
 
@@ -419,7 +419,7 @@ exports.updateNotification=async(req,resp)=>{
 
   }
 
-  await user.save();
+  await user.save({validateBeforeSave:false});
 
   responseSend(resp,201,true,'Updated');
 
@@ -524,6 +524,19 @@ exports.updatePhone=async(req,resp)=>{
     await User.findByIdAndUpdate(req.user._id,{phone});
 
     responseSend(resp,201,true,"Phone Number Updated");
+    
+  } catch (error) {
+    responseSend(resp,500,false,error.message);
+  }
+}
+
+//To get the logged in user details
+
+exports.loggedUserDetails=async(req,resp)=>{
+
+  try {
+
+    responseSend(resp,200,true,req.user);
     
   } catch (error) {
     responseSend(resp,500,false,error.message);

@@ -109,6 +109,13 @@ const propertySchema = new mongoose.Schema({
   views:[],
   clicks:[],
   calls:[],
+
+  situation:{
+    type:String,
+    required:true,
+    enum:['idle','sold','rent'],
+    default:"idle",  
+  }
 });
 //}
 
