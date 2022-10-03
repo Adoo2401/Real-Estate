@@ -643,17 +643,88 @@ exports.getYearProperty=async(req,resp)=>{
     let secondYear=thirdYear-1;
     let firstYear=secondYear-1;
 
-    let data=[];
+    let propertyAdded=[];
+    let propertySold=[];
+    let propertyRent=[];
+  
 
     let property1=await Property.find({added:{$gte:new Date(`${currentYear}-01-1`),$lte:new Date(`${currentYear}-12-31`)}});
     let property2=await Property.find({added:{$gte:new Date(`${fourthYear}-01-1`),$lte:new Date(`${fourthYear}-12-31`)}});
     let property3=await Property.find({added:{$gte:new Date(`${thirdYear}-01-1`),$lte:new Date(`${thirdYear}-12-31`)}});
     let property4=await Property.find({added:{$gte:new Date(`${secondYear}-01-1`),$lte:new Date(`${secondYear}-12-31`)}});
     let property5=await Property.find({added:{$gte:new Date(`${firstYear}-01-1`),$lte:new Date(`${firstYear}-12-31`)}});
-    
-    data.push({x:new Date(currentYear,0,1),y:property1.length},{x:new Date(fourthYear,0,1),y:property2.length},{x:new Date(thirdYear,0,1),y:property3.length},{x:new Date(secondYear,0,1),y:property4.length},{x:new Date(firstYear,0,1),y:property5.length});
 
-    responseSend(resp,200,true,data.reverse());
+    let property6=await Property.find({added:{$gte:new Date(`${currentYear}-01-1`),$lte:new Date(`${currentYear}-12-31`)},situation:"sold"});
+    let property7=await Property.find({added:{$gte:new Date(`${fourthYear}-01-1`),$lte:new Date(`${fourthYear}-12-31`)},situation:"sold"});
+    let property8=await Property.find({added:{$gte:new Date(`${thirdYear}-01-1`),$lte:new Date(`${thirdYear}-12-31`)},situation:"sold"});
+    let property9=await Property.find({added:{$gte:new Date(`${secondYear}-01-1`),$lte:new Date(`${secondYear}-12-31`)},situation:"sold"});
+    let property10=await Property.find({added:{$gte:new Date(`${firstYear}-01-1`),$lte:new Date(`${firstYear}-12-31`)},situation:"sold"});
+
+    let property11=await Property.find({added:{$gte:new Date(`${currentYear}-01-1`),$lte:new Date(`${currentYear}-12-31`)},situation:"rent"});
+    let property12=await Property.find({added:{$gte:new Date(`${fourthYear}-01-1`),$lte:new Date(`${fourthYear}-12-31`)},situation:"rent"});
+    let property13=await Property.find({added:{$gte:new Date(`${thirdYear}-01-1`),$lte:new Date(`${thirdYear}-12-31`)},situation:"rent"});
+    let property14=await Property.find({added:{$gte:new Date(`${secondYear}-01-1`),$lte:new Date(`${secondYear}-12-31`)},situation:"rent"});
+    let property15=await Property.find({added:{$gte:new Date(`${firstYear}-01-1`),$lte:new Date(`${firstYear}-12-31`)},situation:"rent"});
+
+   
+    propertyAdded.push({x:new Date(currentYear,0,1),y:property1.length},{x:new Date(fourthYear,0,1),y:property2.length},{x:new Date(thirdYear,0,1),y:property3.length},{x:new Date(secondYear,0,1),y:property4.length},{x:new Date(firstYear,0,1),y:property5.length});
+    propertySold.push({x:new Date(currentYear,0,1),y:property6.length},{x:new Date(fourthYear,0,1),y:property7.length},{x:new Date(thirdYear,0,1),y:property8.length},{x:new Date(secondYear,0,1),y:property9.length},{x:new Date(firstYear,0,1),y:property10.length});
+    propertyRent.push({x:new Date(currentYear,0,1),y:property11.length},{x:new Date(fourthYear,0,1),y:property12.length},{x:new Date(thirdYear,0,1),y:property13.length},{x:new Date(secondYear,0,1),y:property14.length},{x:new Date(firstYear,0,1),y:property15.length});
+    
+    responseSend(resp,200,true,[propertyAdded.reverse(),propertySold.reverse(),propertyRent.reverse()]);
+
+  } catch (error) {
+    responseSend(resp,500,false,error.message);
+  }
+}
+
+exports.getCityProperties=async(req,resp)=>{
+
+  try {
+    
+    let cities=['rawalpindi','islamabad','lahore','karachi','hyderabad','multan','quetta','gujranwala','sialkot','faislabad','peshawar','bahawalpur','sargodha']
+    let data=[];
+
+    for (var i = cities.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var temp = cities[i];
+      cities[i] = cities[j];
+      cities[j] = temp;
+    }
+
+    for(let i=0;i<8;i++){
+
+      let properties=await Property.find({city:cities[i]});
+      data.push({city:cities[i],properties:properties.length})
+
+    }
+
+    responseSend(resp,200,true,data);
+
+ 
+  } catch (error) {
+
+    responseSend(resp,500,false,error.message);
+  }
+}
+
+exports.adminPieChart=async(req,resp)=>{
+
+  try {
+    
+    let data=[];
+
+    let totalProperties=await Property.find();
+    let totalRentProperties=await Property.find({purpose:'rent'});
+    let totalSaleProperties=await Property.find({purpose:'sale'});
+
+    data.push(
+      {x:"Properties For Sale",y:totalSaleProperties.length,text:totalSaleProperties.length.toString()},
+      {x:"Properties For Rent",y:totalRentProperties.length,text:totalRentProperties.length.toString()},
+      {x:"Total No of Properteis",y:totalProperties.length,text:totalProperties.length.toString()}
+      )
+
+      responseSend(resp,200,true,data);
 
   } catch (error) {
     responseSend(resp,500,false,error.message);

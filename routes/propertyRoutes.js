@@ -21,6 +21,8 @@ const {
   recentlyAdded,
   adminGetSingle,
   getYearProperty,
+  getCityProperties,
+  adminPieChart,
 } = require("../controllers/propertyController");
 const verifyRole = require("../middlewares/verifyRole");
 const verifyToken = require("../middlewares/verifyToken");
@@ -49,6 +51,8 @@ router.route("/admin-edit/:id").put(verifyToken,verifyRole,adminEdit)
 router.route("/admin-delete/:id").delete(verifyToken,verifyRole,adminDelete)
 router.route("/admin-get-single/:id").get(verifyToken,verifyRole,adminGetSingle);
 router.route("/admin-year").get(verifyToken,verifyRole,getYearProperty);
+router.route("/admin-cities").get(verifyToken,verifyRole,getCityProperties)
+router.route("/admin-pie").get(verifyToken,verifyRole,adminPieChart)
 
 //}
 

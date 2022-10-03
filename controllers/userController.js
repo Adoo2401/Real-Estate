@@ -542,3 +542,22 @@ exports.loggedUserDetails=async(req,resp)=>{
     responseSend(resp,500,false,error.message);
   }
 }
+
+
+//For admin to get all users properties || properties for rent and for sale
+
+exports.adminDetails=async(req,resp)=>{
+
+  try {
+    
+    let allUser=await User.find();
+    let allProperties=await Property.find();
+    let propertiesRent=await Property.find({purpose:'rent'});
+    let properteisSale=await Property.find({purpose:"sale"});
+
+    responseSend(resp,200,true,{allUser,allProperties,propertiesRent,properteisSale})
+
+  } catch (error) {
+    responseSend(resp,500,false,error.message);
+  }
+}

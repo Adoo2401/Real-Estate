@@ -1,5 +1,5 @@
 const express = require("express");
-const { RegisterUser, loginUser,addFavourite, getFavourites, delFavourite, adminGetUsers, adminEdit, adminDelete, adminGetSingleUser, recent, getRecent, deleteNotification, getFCMToken, adminNotification, updateSetting, getSetting, updateNotification, getUnseenNotification, updatePassword, updateEmail, updatePhone, loggedUserDetails } = require("../controllers/userController");
+const { RegisterUser, loginUser,addFavourite, getFavourites, delFavourite, adminGetUsers, adminEdit, adminDelete, adminGetSingleUser, recent, getRecent, deleteNotification, getFCMToken, adminNotification, updateSetting, getSetting, updateNotification, getUnseenNotification, updatePassword, updateEmail, updatePhone, loggedUserDetails, adminDetails } = require("../controllers/userController");
 const verifyRole = require("../middlewares/verifyRole");
 const verifyToken = require("../middlewares/verifyToken");
 const router = express.Router();
@@ -31,6 +31,7 @@ router.route('/admin-single-user/:id').get(verifyToken,verifyRole,adminGetSingle
 router.route("/admin-notification").get(verifyToken,verifyRole,adminNotification)
 router.route('/admin-update-notification').put(verifyToken,verifyRole,updateNotification)
 router.route("/admin-getUnseenNotification").get(verifyToken,verifyRole,getUnseenNotification);
+router.route("/admin-information").get(verifyToken,verifyRole,adminDetails)
 //}
 
 module.exports = router;
