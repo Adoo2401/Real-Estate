@@ -12,8 +12,8 @@ exports.RegisterUser = async (req, resp) => {
   
 try {
 
-    let {password,email,name,phone,city,registerAs}=req.body;
-
+    let {password,email,name,phone}=req.body;
+  
     const checkEmail=await User.findOne({email});
     const checkPhone=await User.findOne({phone});
 
@@ -39,17 +39,18 @@ try {
 
     password=await bcrypt.hash(password,10);
 
-    const user=await User.create({email,password,name,phone,city,registerAs})
+    const user=await User.create({email,password,name,phone})
 
     //Creating a json Web Token
 
     const token=jsonwebtoken.sign({id:user._id},process.env.JWT_SECRET)
-
+    
+    delete user.password
   
-    responseSend(resp,201,true,{token,user});
+    resp.status(201).json({success:true,message:{token,user}})
     
   } catch (error) {
-    responseSend(resp, 500, false, error);
+    resp.status(500).json({success:true,message:error.message})
   }
 };
 
@@ -62,46 +63,47 @@ try {
 exports.loginUser=async(req,resp)=>{
   try {
 
-   
+    if(req.query.isGoogle){
+        let user = await User.findOne({email:req.body.email});
+        if(!user){
+           user = await User.create({email:req.body.email,name:req.body.name});
+        }
+        const token=jsonwebtoken.sign({id:user._id},process.env.JWT_SECRET);
+        resp.status(201).json({
+          success:true,
+          message:{
+            user,
+            token
+          }
+        })
+    }else{
 
-    if(!req.body.email || !req.body.password){
+      if(!req.body.email || !req.body.password){
       return responseSend(resp,500,false,"Please Enter All Fields");
     }
 
-    if(!validator.isEmail(req.body.email)){
-      return  responseSend(resp,500,false,"Please Enter A valid Email");
-     }
-
-    
-
-    const user=await User.findOne({email:req.body.email}).select("+password").clone();
-    
+     const user = await User.findOne({
+      $or: [{ email: req.body.email }, { phone: req.body.email }],
+    }).select("+password").clone();
 
     if(!user){
-     return responseSend(resp,500,false,"Email And Password are Incorrect");
+     return responseSend(resp,500,false,"Incorrect login credentials");
     }
 
-
     const hashPass=await bcrypt.compare(req.body.password,user.password);
-
-    
 
     const token=jsonwebtoken.sign({id:user._id},process.env.JWT_SECRET);
 
 
     if(hashPass){
-     return resp.status(201).json({
-        user,
-        token,
-        code:201
-      })
+     return resp.status(201).json({success:true,message:{user,token}});
     }
 
-    responseSend(resp,200,false,"Email And Password Are Incorrect");
-
+    resp.status(500).json({success:false,message:"Incorrect login credentials"});
+  }
     
   } catch (error) {
-    responseSend(resp, 500, false, error);
+    resp.status(500).json({success:false,message:error.message});
   }
 }
 

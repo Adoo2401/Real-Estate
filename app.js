@@ -15,9 +15,9 @@ app.use(expressFileToUpload({useTempFiles:true}))
 app.use(express.json());
 app.use(cors());
 app.use(bodyParser.urlencoded({extended:true}))
-app.use("/api/v1", propertyRoutes);
-app.use("/api/v1", userRoutes);
-app.use("/api/v1",chatRoutes);
+app.use("/api/v1/property", propertyRoutes);
+app.use("/api/v1/user", userRoutes);
+app.use("/api/v1/chat",chatRoutes);
 
 //}
 
