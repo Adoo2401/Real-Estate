@@ -31,7 +31,6 @@ const router = express.Router();
 //Creating routes here for property crud operations{
 
 router.route("/get_property").get(getProperty);
-router.route("/add_property").post(verifyToken,addProperty);
 router.route("/filter_property").get(verifyToken,filterProperty);
 router.route("/delete_property/:property_id").delete(verifyToken,deleteProperty);
 router.route("/update_property/:property_id").put(verifyToken,updateProperty);

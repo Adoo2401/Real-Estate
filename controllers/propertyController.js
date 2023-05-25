@@ -6,6 +6,7 @@ const cloudinary=require("cloudinary");
 const path=require("path");
 const pushNotification = require("../utils/pushNotification");
 const sendToAdmin = require("../utils/sendToAdmin");
+const formatBufferTo64 = require("../utils/formatBuffer");
 //}
 
 //creating main functions that will be called when the specific route will hit{
@@ -144,9 +145,17 @@ exports.getProperty = async (req, resp) => {
 //}
 
 //Controller to add the property to database{
-
+  
 exports.addProperty = async (req, resp) => {
   try {
+    let picturesInfo=[];
+
+    for(let i = 0; i<req.files.length; i++){
+      const file = formatBufferTo64(req.files[i]);
+      let pictures = await cloudinary.v2.uploader.upload(file.content,{folder:"Property Images"})
+      picturesInfo.push({public_id:pictures.public_id,url:pictures.url});
+    }
+    
 
      let address=req.body.address;
      let longitude=req.body.longitude;
@@ -156,99 +165,15 @@ exports.addProperty = async (req, resp) => {
      delete req.body.latitude;
      delete req.body.address
 
-    
-     req.body.purpose=req.body.purpose.toLowerCase();
-     req.body.propertyType=req.body.propertyType.toLowerCase();
-     req.body.propertySubType=req.body.propertySubType.toLowerCase();
-     req.body.city=req.body.city.toLowerCase();
-     req.body.propertyTitle=req.body.propertyTitle.toLowerCase();
-     req.body.landAreaUnit=req.body.landAreaUnit.toLowerCase();
-
-     
-      let images=[];
-      let tempFilePath=[]
-
-      if(!req.files){
-        return resp.status(500).json({success:false,message:"Please choose property image to upload"})
-      }
-
-      if(req.files.propertyImage.length===undefined){
-         
-        const extensionName = path.extname(req.files.propertyImage.name); // fetch the file extension
-     
-        const allowedExtension = ['.png','.jpg','.jpeg'];
-
-        if(!allowedExtension.includes(extensionName)){
-
-         return resp.status(422).json({success:false,message:"Invalid Image Please Choose png jpg and jpeg images"});
-
-         }
-         
-        if(req.files.propertyImage.size>5000000){
-          return resp.status(422).json({success:false,message:"Please Choose Image less than 5MB"});
-        }
-
-        const result=await cloudinary.v2.uploader.upload(req.files.propertyImage.tempFilePath,{
-          folder:"images"
-        })
-  
-        images.push({
-          public_id:result.public_id,
-          url:result.secure_url
-        })
-
-      }else{
-
-        for(let i=0;i<req.files.propertyImage.length;i++){
-
-          const extensionName = path.extname(req.files.propertyImage[i].name); // fetch the file extension
-    
-          const allowedExtension = ['.png','.jpg','.jpeg'];
-
-          if(!allowedExtension.includes(extensionName)){
-           
-            return resp.status(422).json({success:false,message:"Invalid Image Please Choose png jpg and jpeg images"}); 
-
-           }
-           
-          if(req.files.propertyImage[i].size>5000000){
-            
-            return resp.status(422).json({success:false,message:"Please Choose Image less than 5MB"}); 
-          }
-
-          tempFilePath.push(req.files.propertyImage[i].tempFilePath)
-        }
-
-      }
-
-      if(tempFilePath.length>0){
-
-        for(let i=0;i<tempFilePath.length;i++){
-
-          const result=await cloudinary.v2.uploader.upload(tempFilePath[i],{
-            folder:"images"
-          })
-    
-          images.push({
-            public_id:result.public_id,
-            url:result.secure_url
-          })
-
-        }
-
-      }
-     
-      
-     req.body.images=images;
+     req.body.images=picturesInfo;
 
      const newProperty = await Property.create({...req.body,user:req.user._id,location:{type:"Point",address:address,coordinates:[parseFloat(longitude),parseFloat(latitude)]}});
 
-    await sendToAdmin(`A new property has been added ${newProperty.propertyTitle}`,newProperty._id);
+     await sendToAdmin(`A new property has been added ${newProperty.propertyTitle}`,newProperty._id);
 
-    responseSend(resp, 201, true, newProperty);
+     responseSend(resp, 201, true, newProperty);
   } catch (error) {
-   
-    responseSend(resp, 500, false, error);
+    responseSend(resp, 500, false, error.message);
   }
 };
 
@@ -258,6 +183,8 @@ exports.addProperty = async (req, resp) => {
 
 exports.filterProperty = async (req, resp) => {
   try {
+    
+    
 
     let gt=req.query.gt==='undefined'?undefined:req.query.gt;
     let lt=req.query.lt==='undefined'?undefined:req.query.lt;
@@ -270,6 +197,8 @@ exports.filterProperty = async (req, resp) => {
     let bedroom=req.query.bedroom==='undefined'?undefined:req.query.bedroom;
     let bathroom=req.query.bathroom==='undefined'?undefined:req.query.bathroom
 
+    const page = parseInt(req.query.page) || 1;
+    const pageSize = 1;
     
     const property = await Property.find({
       $and: [
@@ -315,8 +244,7 @@ exports.filterProperty = async (req, resp) => {
           {status:'active'}
       ],
     })
-      .sort({ superHot: -1, verified: -1 })
-      .clone();
+      .sort({ superHot: -1, verified: -1 }).skip((page - 1)*pageSize).limit(pageSize).select("_id propertyTitle bedroom bathroom landAreaNumber landAreaUnit purpose price images location")
 
     responseSend(resp, 200, true, property);
   } catch (error) {

@@ -1,17 +1,9 @@
-//importing some usefull modules{
-
 require("dotenv").config({path:"./config/config.env"})
 const app = require("./app");
 const connectDatabase = require("./config/database");
 const cloudinary=require("cloudinary");
 
-//}
-
-//connecting database mongodb{
-
 connectDatabase();
-
-//}
 
 cloudinary.config({
   cloud_name:process.env.CLOUDINARY_NAME,
@@ -20,8 +12,7 @@ cloudinary.config({
 })
 
 
-//Createing the server here{
-app.listen(process.env.PORT,"192.168.12.5",() => {
+app.listen(process.env.PORT,"192.168.12.16",() => {
   console.log(`server is working on ${process.env.PORT}`);
 });
-//}
+

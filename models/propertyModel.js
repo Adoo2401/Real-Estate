@@ -7,21 +7,24 @@ const propertySchema = new mongoose.Schema({
     type: String,
     required: true,
     trim: true,
+    lowercase: true,
   },
 
   propertyType: {
     type: String,
     required: true,
+    lowercase:true
   },
 
   propertySubType: {
     type: String,
-    required: true,
+    lowercase:true
   },
 
   city: {
     type: String,
     required: true,
+    lowercase:true
   },
 
   location: {
@@ -33,6 +36,7 @@ const propertySchema = new mongoose.Schema({
   propertyTitle: {
     type: String,
     required: true,
+    lowercase:true
   },
 
   propertyDescription: {
@@ -52,14 +56,17 @@ const propertySchema = new mongoose.Schema({
   landAreaUnit: {
     type: String,
     required: true,
+    lowercase:true
   },
 
   bedroom: {
     type: Number,
+    default:0
   },
 
   bathroom: {
     type: Number,
+    default:0
   },
 
   superHot: {
@@ -75,7 +82,7 @@ const propertySchema = new mongoose.Schema({
 
   status:{
     type:String,
-    default:"pending"
+    default:"active"
   },
 
   verified: {
