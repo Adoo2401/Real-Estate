@@ -184,9 +184,9 @@ exports.addProperty = async (req, resp) => {
 exports.filterProperty = async (req, resp) => {
   try {
     
-    
-
+  
     let gt=req.query.gt==='undefined'?undefined:req.query.gt;
+    let purpose = req.query.purpose==="undefined"?undefined:req.query.purpose;
     let lt=req.query.lt==='undefined'?undefined:req.query.lt;
     let city=req.query.city==='undefined'?undefined:req.query.city;
     let propertySubType=req.query.propertySubType==='undefined'?undefined:req.query.propertySubType;
@@ -198,7 +198,7 @@ exports.filterProperty = async (req, resp) => {
     let bathroom=req.query.bathroom==='undefined'?undefined:req.query.bathroom
 
     const page = parseInt(req.query.page) || 1;
-    const pageSize = 1;
+    const pageSize = 15;
     
     const property = await Property.find({
       $and: [
@@ -210,7 +210,7 @@ exports.filterProperty = async (req, resp) => {
           : {},
 
         propertyType!==undefined ? { propertyType: req.query.propertyType } : {},
-        req.query.purpose!==undefined ? { purpose: req.query.purpose } : {},
+        purpose!==undefined ? { purpose: req.query.purpose } : {},
         req.query.latitude!==undefined && req.query.longitude!==undefined
           ? {
             location:{
@@ -244,7 +244,7 @@ exports.filterProperty = async (req, resp) => {
           {status:'active'}
       ],
     })
-      .sort({ superHot: -1, verified: -1 }).skip((page - 1)*pageSize).limit(pageSize).select("_id propertyTitle bedroom bathroom landAreaNumber landAreaUnit purpose price images location")
+      .sort({ superHot: -1, verified: -1 }).select("_id propertyTitle bedroom bathroom landAreaNumber landAreaUnit purpose price images location")
 
     responseSend(resp, 200, true, property);
   } catch (error) {
@@ -343,21 +343,10 @@ exports.singleProperty=async(req,resp)=>{
 
   try {
     
-    let property=await Property.findById(req.params.property_id).clone()
-
-    let user=await User.findById(property.user).clone();
-    
-    let userDetails={
-      name:user.name,
-      phone:user.phone,
-      email:user.email,
-      city:user.city
-    }
-
-    let final={property,userDetails};
+    let property=await Property.findById(req.params.property_id).populate("user","name email phone");
 
     if(property){
-      return responseSend(resp,200,true,final);
+      return responseSend(resp,200,true,property);
     }
 
     responseSend(resp,500,false,'No property Found');
