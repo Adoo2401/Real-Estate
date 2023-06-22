@@ -9,12 +9,9 @@ const verifyToken = require("./middlewares/verifyToken");
 const { addProperty } = require("./controllers/propertyController");
 
 
-
-
 app.use(express.json());
 app.use(express.urlencoded({extended:true}))
 app.use(cors());
-
 
 const ALLOWED_FORMATS=['image/jpeg','image/png','image/jpg'];
 let fileTypeCheck=false;
@@ -40,7 +37,7 @@ const singleUploadCtrl=(req,resp,next)=>{
     if (error) {
         if (error instanceof multer.MulterError && error.code === 'LIMIT_FILE_SIZE') {
           fileSizeCheck = true;
-          return resp.status(422).json({ success: false, message: 'File size exceeds the limit', error });
+          return resp.status(422).json({ success: false, message: 'Please add images less than 5mb', error });
         }
         return resp.status(422).json({
           success: false,

@@ -147,6 +147,7 @@ exports.getProperty = async (req, resp) => {
 //Controller to add the property to database{
   
 exports.addProperty = async (req, resp) => {
+  
   try {
     let picturesInfo=[];
 
@@ -156,10 +157,10 @@ exports.addProperty = async (req, resp) => {
       picturesInfo.push({public_id:pictures.public_id,url:pictures.url});
     }
     
-
-     let address=req.body.address;
+     let address=req.body.address || "Some Adress";
      let longitude=req.body.longitude;
      let latitude=req.body.latitude;
+     let city = req.body.city || "Lahore"
 
      delete req.body.longitude;
      delete req.body.latitude;
@@ -167,7 +168,7 @@ exports.addProperty = async (req, resp) => {
 
      req.body.images=picturesInfo;
 
-     const newProperty = await Property.create({...req.body,user:req.user._id,location:{type:"Point",address:address,coordinates:[parseFloat(longitude),parseFloat(latitude)]}});
+     const newProperty = await Property.create({...req.body,user:req.user._id,city,location:{type:"Point",address:address,coordinates:[parseFloat(longitude),parseFloat(latitude)]}});
 
      await sendToAdmin(`A new property has been added ${newProperty.propertyTitle}`,newProperty._id);
 
@@ -237,8 +238,8 @@ exports.filterProperty = async (req, resp) => {
             : { bedroom: req.query.bedroom }
           : {},
         bathroom!==undefined
-          ? req.query.bathroom === "10"
-            ? { bathroom: { $gte: 10 } }
+          ? req.query.bathroom === "6"
+            ? { bathroom: { $gte: 6 } }
             : { bathroom: req.query.bathroom }
           : {},
           {status:'active'}
@@ -517,7 +518,13 @@ exports.loggedInUserStatusProperties=async(req,resp)=>{
     
   let {status}=req.params;
 
-  let property=await Property.find({status:status,user:req.user._id});
+  let query = { user: req.user._id };
+
+   if (status !== 'All Ads') {
+     query.status = status;
+   }
+
+   let property = await Property.find(query);
 
   responseSend(resp,200,true,property);
 

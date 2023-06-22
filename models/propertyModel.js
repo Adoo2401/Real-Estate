@@ -82,7 +82,7 @@ const propertySchema = new mongoose.Schema({
 
   status:{
     type:String,
-    default:"active"
+    default:"pending"
   },
 
   verified: {
